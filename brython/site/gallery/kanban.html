@@ -11,7 +11,7 @@
         <script type="text/javascript" src="../../src/brython.js"></script>
 
         <script type="text/javascript">
-            function popup_dump(s) {
+/*            function popup_dump(s) {
                 var w = window.open("", "", "");
                 w.document.open("text/plain");
                 w.document.write(s);
@@ -37,7 +37,7 @@
                     document.open("about:blank")
                 }
             }
-
+*/
         </script>
 
         <style text="text/css">
@@ -140,7 +140,8 @@
         </style>
     </head>
 
-    <body onLoad="disclaimer(); brython(1)">
+<!--    <body onLoad="disclaimer(); brython(1)"> -->
+    <body onLoad="brython(1)">
 
         <script type="text/python" src='kanban.py'></script>
 
