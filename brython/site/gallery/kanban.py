@@ -1,3 +1,5 @@
+# print() === javascripts console.log()
+
 # ----------------------------------------------------------
 import time
 
@@ -11,7 +13,7 @@ SCHEMA_REVISION = "1.0"
 
 STEPS = [
     "TODO" , "SPECIFICATION" , "DESIGN" , "DEVELOPMENT" , "VALIDATION" , "READY"
-    ]
+    ]  # required for board to really show up.
 
 STEPS_COLORS = [
     "#777777" , "#888888" , "#999999" , "#AAAAAA" , "#BBBBBB" , "#CCCCCC"
@@ -29,7 +31,7 @@ class KanbanException(Exception):
         Exception.__init__(self, "Kanban Error: %s" % msg)
 
 # ----------------------------------------------------------
-class KanbanModel:
+class KanbanModel:   # It moves, removes and adds tasks/steps
     def __init__(self, counter=1, schema_revision=None, steps_colors=None, tasks_colors=None, tasks=None):
         self.schema_revision = schema_revision
         self.counter = int(counter)
@@ -42,18 +44,18 @@ class KanbanModel:
         else:
             self.tasks = tasks
 
-    def add_step(self, desc, color_id):
+    def add_step(self, desc, color_id):   # This creates the columns
         return self.add_task("root", desc, color_id, 0, prefix="step%d")
 
     def add_task(self, parent_id, desc, color_id, progress, prefix="task%d"):
         task_id = self.get_next_id(prefix)
         task = Task(task_id, 0, desc, color_id, progress, [])
         self.tasks[task.id] = task
-
+        
         parent_task = self.tasks[parent_id]
         parent_task.add_task(task)
 
-        return task
+        return task  # If I understand this correctly each task knows it's parent ( for DOM placement purposes perhaps )
 
     def remove_task(self, task_id):
         task = self.tasks[task_id]
@@ -64,6 +66,7 @@ class KanbanModel:
         del self.tasks[task_id]
         parent_task.remove_task(task)
 
+# This tells the 2-3 DOM objects that the user want's to move a task to a particular spot.
     def move_task(self, task_id, dst_task_id):
         task = self.tasks[task_id]
 
@@ -79,6 +82,7 @@ class KanbanModel:
         return next_id
 
 # ----------------------------------------------------------
+# All tasks know it's parents but parents don't know it's children.
 class Task:
     def __init__(self, id=None, parent_id=None, desc=None, color_id=None, progress=None, task_ids=None):
         self.id = id
@@ -97,7 +101,7 @@ class Task:
         task.parent_id = None
 
 # ----------------------------------------------------------
-class KanbanView:
+class KanbanView:  # Handles the DOM listeners and element attributes ( classes, etc. ) 
     def __init__(self, kanban):
         self.kanban = kanban
         doc['load_kanban'].bind('click', self.load)
@@ -130,7 +134,7 @@ class KanbanView:
         count.text = len(step.task_ids)
         header <= count
 
-        node.bind('dragover', self.drag_over)
+        node.bind('dragover', self.drag_over) # required
         node.bind('drop', ev_callback(self.drag_drop, step))
 
         title.bind('click', ev_callback(self.add_task, step, node))
@@ -166,7 +170,7 @@ class KanbanView:
         node <= desc
 
         node.bind('dragstart', ev_callback(self.drag_start, task))
-        node.bind('dragover', self.drag_over)
+        node.bind('dragover', self.drag_over)   # So far removing this has not drawbacks 
         node.bind('drop', ev_callback(self.drag_drop, task))
         node.bind('click', ev_callback(self.change_task_color, task, node))
 
@@ -180,13 +184,14 @@ class KanbanView:
 
         self.draw_tasks(task, node)
 
-    def set_text(self, task):
+    def set_text(self, task): # Simple inner html text manipulation
         desc = doc["desc %s" % task.id]
         clear_node(desc)
         desc.html = task.desc
 
     def drag_start(self, ev, task):
         ev.data['text'] = task.id
+
         ev.data.effectAllowed = 'move'
 
         ev.stopPropagation()
@@ -196,7 +201,7 @@ class KanbanView:
 
         ev.data.dropEffect = 'move'
 
-    def drag_drop(self, ev, dst_task):
+    def drag_drop(self, ev, dst_task): # Gets starting step or task (Max item that task is in)
         ev.preventDefault()
         ev.stopPropagation()
 
@@ -207,13 +212,14 @@ class KanbanView:
         dst_task_node = doc[dst_task_id]
 
         dst_task_node <= src_task_node
-        self.kanban.move_task(src_task_id, dst_task_id)
+
+        self.kanban.move_task(src_task_id, dst_task_id) # Tell Kanban to update DOMS
 
     def add_task(self, ev, step, node):
         ev.stopPropagation()
 
         t = time.strftime(TIME_FMT)
-        desc = prompt("New task", "%s %s" % (step.desc, t))
+        desc = prompt("New task", "%s %s" % (step.desc, t)) # Creates popup
         if desc:
             task = self.kanban.add_task(step.id, desc, 0, 0)
             self.draw_task(task, node)
@@ -227,7 +233,7 @@ class KanbanView:
             del doc[task.id]
             self.kanban.remove_task(task.id)
 
-    def change_task_color(self, ev, task, node):
+    def change_task_color(self, ev, task, node): #TODO: We want to exand this to have Raphael color scheme.
         ev.stopPropagation()
 
         task.color_id = ( task.color_id + 1 ) % len(self.kanban.tasks_colors)
@@ -249,7 +255,7 @@ class KanbanView:
             task.desc = ret
             self.set_text(task)
 
-    def load(self, *args):
+    def load(self, *args):  # This seems to work (the numbers in each step update correctly )
         if "kanban" in storage:
             txt = storage["kanban"]
             try:
@@ -274,11 +280,11 @@ class KanbanView:
 
         self.draw()
 
-    def save(self, *args):
+    def save(self, *args):  # Broken, it saves an instance but this saved item breaks the Kanban board.
         txt = instance_repr(self.kanban)
         storage["kanban"] = txt
 
-    def dump(self, *args):
+    def dump(self, *args):  # Unsure as to what this does
         code = "storage['kanban'] = " + instance_repr(self.kanban)
         popup_dump(code)
 
