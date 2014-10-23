@@ -63,22 +63,30 @@ def nodeToSVG(aNode, width, padding):
 
 	return container
 
+# maybe we can just do all manipulation in the dom tree?
+# why do we need the data structure at all?
+# when we add an element to the DOM tree it is automatically aware
+# of its parent and children through Brython, using this information
+# can we calculate the appropriate width and position? 
+# We need to be able to grab our index within children (easy, it's a list)
+# We also need to know the total number of children (easy, len(parent.children))
+# Does this cause future problems?
+# Dragging and dropping is a matter of resizing the destination level
+# and then asking the dragged tree to resize itself according to its location in
+# the destination level.
+
 
 def treeToSVG(rootNode, rootDOM, startingWidth, padding):
-	# outputs in post-order
-
-	# we calculate the expected width for the next element here because it saves having to look up
-	# the parent later
+	# calculate width here avoid parent lookup later
 	numChildren = len(rootNode.children)
 	nextWidth = startingWidth
 	if(numChildren > 0):
 		nextWidth = startingWidth / numChildren
 
 	for child in rootNode.children:
-		# group the children with the parent
-		rootDOM <= treeToSVG(child, rootDOM, nextWidth, padding)
+		treeToSVG(child, rootDOM, nextWidth, padding)
+
 	rootDOM <= nodeToSVG(rootNode, startingWidth, padding)
-	return nodeToSVG(rootNode, nextWidth, padding)
 
 myTree = node('root')
 branch = node('branch')
