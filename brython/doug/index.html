@@ -2,9 +2,20 @@
 
 <head>
 <script src="../src/brython.js"></script>
+<link rel="stylesheet" href="../src/uniform/themes/default/css/uniform.default.css" media="screen" />
+<script src="../src/js/jquery-2.1.0.min.js"></script> <!-- jquery can make life that much easier so I'll add this here -->
+<script src="../src/uniform/jquery.uniform.js"></script>
 </head>
 
 <body onload="brython(1)">
+<script type="text/javascript" src="../src/zoom/js/zoom.js"></script> <!-- This can't be in the head cause it requires the body to be defined in some shape or form -->
+<script>
+// Although this could be done with document.querySelector it just doesn't seem powerful enough to really get the job done; it didn't zoom to a text svg instead it went to the group, so I'm just using jquery for this. 
+$(document).click(function(e){
+                  e.preventDefault();
+                  zoom.to({element: e.target});
+});
+</script>
 <script type="text/python" src="test.py"></script>
 <svg 	xmlns="http://www.w3.org/2000/svg" 
 		xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -15,5 +26,4 @@
   </g>
 </svg>
 </body>
-
 </html>
