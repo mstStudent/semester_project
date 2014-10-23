@@ -54,26 +54,25 @@ var _target = null; // Yes it's a global, but it's needed.
 $('svg').each(function(){
                   $(this).click(function(e){
                   e.preventDefault();
-                  _target = $(e.target)
-                  var x = parseInt(_target.attr('x'))+2
-                  var y = parseInt(_target.attr('y'))+1.5
-                  if ($("#svg_text_update").css("display") == 'block'){
-                       $("#svg_text_update").css("display",'none');
-                  }
-                  else{
-	                  $("#svg_text_update").css("display",'');
-        	          $("#svg_text_update").css("left", x+'px');
-                	  $("#svg_text_update").css("top", y+'px');
-	                  $("input[type='text']").change(function(){
-			     console.log("TEST");
-		          })
-                          $("#updateButton").click(function(){
-				console.log("TEST");
-                                _target.html($("#newText").val())
-			  });
-                  }
                   zoom.to({element: e.target});
-                  })
+                  _target = $(e.target)
+                  if (_target.is('text')){
+	                  var x = parseInt(_target.attr('x'))+2
+        	          var y = parseInt(_target.attr('y'))+1.5
+        	          if ($("#svg_text_update").css("display") == 'block'){
+        	               $("#svg_text_update").css("display",'none');
+        	          }
+        	          else{
+		                  $("#svg_text_update").css("display",'');
+        		          $("#svg_text_update").css("left", x+'px');
+        	        	  $("#svg_text_update").css("top", y+'px');
+		                  $("#updateButton").click(function(){
+	       	                        _target.html($("#newText").val())
+	       	                        $("#newText").val('')
+				  });
+        	          }
+        	 }
+                 })
 
 });
 </script>
