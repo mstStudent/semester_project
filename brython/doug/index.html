@@ -8,13 +8,16 @@
 </head>
 
 <body onload="brython(1)">
+<form id="svg_text_update" style="position: absolute; display: none;">
+ <input id="newText"></input><br>
+ <input id=updateButton type="button" value="Update"></input>
+</form>
 <script type="text/javascript" src="../src/zoom/js/zoom.js"></script> <!-- This can't be in the head cause it requires the body to be defined in some shape or form -->
 <script>
 // Although this could be done with document.querySelector it just doesn't seem powerful enough to really get the job done; it didn't zoom to a text svg instead it went to the group, so I'm just using jquery for this. 
-$(document).click(function(e){
-                  e.preventDefault();
-                  zoom.to({element: e.target});
-});
+/*
+  It would be nice to have the js here and not below, but then again this will probably need to me migrated to the python portion of this unless we say screw it and do the entire thing in js/jquery.
+*/
 </script>
 <script type="text/python" src="test.py"></script>
 <svg 	xmlns="http://www.w3.org/2000/svg" 
@@ -26,4 +29,52 @@ $(document).click(function(e){
   </g>
 </svg>
 </body>
+<script>
+/*
+   This block would work but the python items are loaded way after this html page is loaded so it's useless
+$('id^=text_]').each(function(){
+                  $(this).click(function(e){
+                  e.preventDefault();
+                  var target = $(e.target)
+                  var x = parseInt(target.attr('x'))+2
+                  var y = parseInt(target.attr('y'))+1.5
+                  $("#svg_text_update").css("display",'');
+                  $("#svg_text_update").css("left", x+'px');
+                  $("#svg_text_update").css("top", y+'px');
+                  target.uniform({text: "test"});
+                  zoom.to({element: e.target});
+                  })
+
+});
+*/
+var _target = null; // Yes it's a global, but it's needed.
+// since EVERYTHING here but the input item is a svg we can get away with this.
+
+// TODO: This is a really crude way of doing things..
+$('svg').each(function(){
+                  $(this).click(function(e){
+                  e.preventDefault();
+                  _target = $(e.target)
+                  var x = parseInt(_target.attr('x'))+2
+                  var y = parseInt(_target.attr('y'))+1.5
+                  if ($("#svg_text_update").css("display") == 'block'){
+                       $("#svg_text_update").css("display",'none');
+                  }
+                  else{
+	                  $("#svg_text_update").css("display",'');
+        	          $("#svg_text_update").css("left", x+'px');
+                	  $("#svg_text_update").css("top", y+'px');
+	                  $("input[type='text']").change(function(){
+			     console.log("TEST");
+		          })
+                          $("#updateButton").click(function(){
+				console.log("TEST");
+                                _target.html($("#newText").val())
+			  });
+                  }
+                  zoom.to({element: e.target});
+                  })
+
+});
+</script>
 </html>
