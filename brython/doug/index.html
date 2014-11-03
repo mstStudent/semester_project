@@ -10,15 +10,37 @@ rect {
 <body>
 <svg width="960" height="100">
      <rect width="960" height="100" style="fill:rgb(255,255,255)"/>
-     <image x="0" y="65" width="25" height="25" xlink:href="./add.svg"/>
-     <text x="27" y="85" fill="black">Add Project</text>
-     <image x="200" y="65" width="25" height="25" xlink:href="./pen.png"/>
-     <text x="227" y="85" fill="black">Edit Project</text>
-     <image x="500" y="65" width="25" height="25" xlink:href="./delete.svg"/>
-     <text x="527" y="85" fill="black">Delete Project</text>
+     <g id="add">
+        <image x="0" y="65" width="25" height="25" xlink:href="./add.svg"/>
+        <text x="27" y="85" fill="black">Add Project</text>
+     </g>
+     <g id="edit">
+        <image x="200" y="65" width="25" height="25" xlink:href="./pen.png"/>
+        <text x="227" y="85" fill="black">Edit Project</text>
+     </g>
+     <g id="delete">
+        <image x="500" y="65" width="25" height="25" xlink:href="./delete.svg"/>
+        <text x="527" y="85" fill="black">Delete Project</text>
+     </g>
 </svg>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
+
+function add(){
+  alert("Insert Add Logic");
+}
+
+function edit(){
+   alert("Insert Edit Logic");
+}
+
+function remove(){
+   alert("Insert Delete Logic");
+}
+
+document.getElementById("add").addEventListener("click",function (){add();});
+document.getElementById("edit").addEventListener("click",function (){edit();});
+document.getElementById("delete").addEventListener("click",function (){remove();});
 
 var width = 960,
     height = 500;
