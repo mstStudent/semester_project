@@ -1,79 +1,59 @@
-<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
 
-<head>
-<script src="../src/brython.js"></script>
-<link rel="stylesheet" href="../src/uniform/themes/default/css/uniform.default.css" media="screen" />
-<script src="../src/js/jquery-2.1.0.min.js"></script> <!-- jquery can make life that much easier so I'll add this here -->
-<script src="../src/uniform/jquery.uniform.js"></script>
-</head>
+rect {
+  stroke: #fff;
+}
 
-<body onload="brython(1)">
-<form id="svg_text_update" style="position: absolute; display: none;">
- <input id="newText"></input><br>
- <input id=updateButton type="button" value="Update"></input>
-</form>
-<script type="text/javascript" src="../src/zoom/js/zoom.js"></script> <!-- This can't be in the head cause it requires the body to be defined in some shape or form -->
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-// Although this could be done with document.querySelector it just doesn't seem powerful enough to really get the job done; it didn't zoom to a text svg instead it went to the group, so I'm just using jquery for this. 
-/*
-  It would be nice to have the js here and not below, but then again this will probably need to me migrated to the python portion of this unless we say screw it and do the entire thing in js/jquery.
-*/
-</script>
-<script type="text/python" src="test.py"></script>
-<svg 	xmlns="http://www.w3.org/2000/svg" 
-		xmlns:xlink="http://www.w3.org/1999/xlink" 
-    	width="100%" 
-    	height="100%" 
-    	style="border-style:solid;border-width:1;border-color:#000;">
-  <g id="panel" width="100%" height="50%">
-  </g>
-</svg>
-</body>
-<script>
-/*
-   This block would work but the python items are loaded way after this html page is loaded so it's useless
-$('id^=text_]').each(function(){
-                  $(this).click(function(e){
-                  e.preventDefault();
-                  var target = $(e.target)
-                  var x = parseInt(target.attr('x'))+2
-                  var y = parseInt(target.attr('y'))+1.5
-                  $("#svg_text_update").css("display",'');
-                  $("#svg_text_update").css("left", x+'px');
-                  $("#svg_text_update").css("top", y+'px');
-                  target.uniform({text: "test"});
-                  zoom.to({element: e.target});
-                  })
 
+var width = 960,
+    height = 500;
+
+var x = d3.scale.linear()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([0, height]);
+
+var color = d3.scale.category20c();
+
+var partition = d3.layout.partition()
+    .children(function(d) { return isNaN(d.value) ? d3.entries(d.value) : null; })
+    .value(function(d) { return d.value; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var rect = svg.selectAll("rect");
+
+d3.json("readme2.json", function(error, root) {
+  rect = rect
+      .data(partition(d3.entries(root)[0]))
+    .enter().append("rect")
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .attr("width", function(d) { return x(d.dx); })
+      .attr("height", function(d) { return y(d.dy); })
+      .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
+      .on("click", clicked);
 });
-*/
-var _target = null; // Yes it's a global, but it's needed.
-// since EVERYTHING here but the input item is a svg we can get away with this.
 
-// TODO: This is a really crude way of doing things..
-$('svg').each(function(){
-                  $(this).click(function(e){
-                  e.preventDefault();
-                  zoom.to({element: e.target});
-                  _target = $(e.target)
-                  if (_target.is('text')){
-	                  var x = parseInt(_target.attr('x'))+2
-        	          var y = parseInt(_target.attr('y'))+1.5
-        	          if ($("#svg_text_update").css("display") == 'block'){
-        	               $("#svg_text_update").css("display",'none');
-        	          }
-        	          else{
-		                  $("#svg_text_update").css("display",'');
-        		          $("#svg_text_update").css("left", x+'px');
-        	        	  $("#svg_text_update").css("top", y+'px');
-		                  $("#updateButton").click(function(){
-	       	                        _target.html($("#newText").val())
-	       	                        $("#newText").val('')
-				  });
-        	          }
-        	 }
-                 })
+function clicked(d) {
+  x.domain([d.x, d.x + d.dx]);
+  y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
 
-});
+  rect.transition()
+      .duration(750)
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+      .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+}
+
 </script>
-</html>
