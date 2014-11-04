@@ -22,25 +22,12 @@ rect {
         <image x="500" y="65" width="25" height="25" xlink:href="./delete.svg"/>
         <text x="527" y="85" fill="black">Delete Project</text>
      </g>
+     <text id="temp" x="0" y="25" fill="black"><script>document.activeElement;</script></text>
 </svg>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-function add(){
-  alert("Insert Add Logic");
-}
-
-function edit(){
-   alert("Insert Edit Logic");
-}
-
-function remove(){
-   alert("Insert Delete Logic");
-}
-
-document.getElementById("add").addEventListener("click",function (){add();});
-document.getElementById("edit").addEventListener("click",function (){edit();});
-document.getElementById("delete").addEventListener("click",function (){remove();});
+var bigRoot;
 
 var width = 960,
     height = 500;
@@ -59,14 +46,53 @@ var partition = d3.layout.partition()
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .attr("id","canvas");
 
 var rect = svg.selectAll("rect");
 
-d3.json("readme2.json", function(error, root) {
+var baseRoot = document.activeElement; 
+
+function redraw(){
+         rect  = rect
+                .data(partition(d3.entries(bigRoot)[0]))
+                .enter().append("rect")
+                .attr("x", function(d) { return x(d.x); })
+                .attr("y", function(d) { return y(d.y); })
+                .attr("width", function(d) { return x(d.dx); })
+                .attr("height", function(d) { return y(d.dy); })
+                .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
+                .on("click", clicked);      
+}
+
+function add(){
+   var basic_task = {"NewTask": 0}
+   var temp = bigRoot;
+   console.log(temp);
+   temp['goals'].newTask = basic_task;
+   console.log(temp);
+   bigRoot = temp;
+   redraw();
+}
+
+function edit(){
+   alert("Insert Edit Logic");
+}
+
+function remove(){
+   alert("Insert Delete Logic");
+}
+
+document.getElementById("add").addEventListener("click",function (){add();});
+document.getElementById("edit").addEventListener("click",function (){edit();});
+document.getElementById("delete").addEventListener("click",function (){remove();});
+
+
+d3.json("readme3.json", function(error, root) {
+  bigRoot = root;
   rect = rect
       .data(partition(d3.entries(root)[0]))
-    .enter().append("rect")
+      .enter().append("rect")
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y); })
       .attr("width", function(d) { return x(d.dx); })
