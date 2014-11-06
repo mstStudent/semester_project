@@ -40,35 +40,24 @@ var y = d3.scale.linear()
 
 var color = d3.scale.category20c();
 
-var partition = d3.layout.partition()
+var rect;
+var selectedObj;
+
+var draw = function(data){
+
+  var partition = d3.layout.partition()
     .children(function(d) { return isNaN(d.value) ? d3.entries(d.value) : null; })
     .value(function(d) { return d.value; });
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("id","canvas");
-
-var rect = svg.selectAll("rect");
-
-var baseRoot = document.activeElement; 
-
-function redraw(){
-
-  d3.select("#canvas").remove();
 
   var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("id","canvas");
-
+  
   rect = svg.selectAll("rect");
-
-  console.log("Rect: ",rect);
-  console.log("svg: ",svg);
-
+  
   rect = rect
-      .data(partition(d3.entries(bigRoot)[0]))
+      .data(partition(d3.entries(data)[0]))
       .enter().append("rect")
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y); })
@@ -76,29 +65,15 @@ function redraw(){
       .attr("height", function(d) { return y(d.dy); })
       .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
       .on("click", clicked);
-/*  rect  = rect.select("svg").selectAll("rect")
-        .data(partition(d3.entries(bigRoot)[0]))
-  
-  rect.exit().remove();
-*/
-  /*      
-  rect.enter().append("rect")
-        .attr("x", function(d) { return x(d.x); })
-        .attr("y", function(d) { return y(d.y); })
-        .attr("width", function(d) { return x(d.dx); })
-        .attr("height", function(d) { return y(d.dy); })
-        .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
-        .on("click", clicked); 
-        */
+}
+
+function redraw(){
+  d3.selectAll("rect").remove();
+  draw(bigRoot);
 }
 
 function add(){
-   var basic_task = {"NewTask": 4013}
-   var temp = bigRoot;
-   console.log(temp);
-   temp['goals'].newTask = 4013;
-   console.log(temp);
-   bigRoot = temp;
+   bigRoot['goals'].newTask = 4013;
    redraw();
 }
 
@@ -110,25 +85,6 @@ function remove(){
    alert("Insert Delete Logic");
 }
 
-document.getElementById("add").addEventListener("click",function (){add();});
-document.getElementById("edit").addEventListener("click",function (){edit();});
-document.getElementById("delete").addEventListener("click",function (){remove();});
-
-var selectedObj;
-
-d3.json("readme3.json", function(error, root) {
-  bigRoot = root;
-  rect = rect
-      .data(partition(d3.entries(root)[0]))
-      .enter().append("rect")
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .attr("width", function(d) { return x(d.dx); })
-      .attr("height", function(d) { return y(d.dy); })
-      .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
-      .on("click", clicked);
-});
-
 function clicked(d) {
   x.domain([d.x, d.x + d.dx]);
   y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
@@ -139,8 +95,16 @@ function clicked(d) {
       .attr("y", function(d) { return y(d.y); })
       .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
       .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
-
   selectedObj = d;
 }
 
+
+document.getElementById("add").addEventListener("click",function (){add();});
+document.getElementById("edit").addEventListener("click",function (){edit();});
+document.getElementById("delete").addEventListener("click",function (){remove();});
+
+d3.json("readme3.json", function(error, root) {
+    bigRoot = root;
+    draw(bigRoot);
+});
 </script>
