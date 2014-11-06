@@ -52,7 +52,8 @@ var draw = function(data){
   var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("id","canvas");
+    .attr("id","canvas")
+    .attr("display","block");
   
   rect = svg.selectAll("rect");
   
@@ -68,8 +69,14 @@ var draw = function(data){
 }
 
 function redraw(){
-  d3.selectAll("rect").remove();
+  temp = selectedObj;
+  clickMe = d3.select("#canvas").select("rect");
+  d3.select("#canvas").attr("display","none");
+  clicked(clickMe.data()[0],0);
+  d3.select("#canvas").remove();
   draw(bigRoot);
+  clicked(temp,0);
+  d3.select("#canvas").attr("display","block");
 }
 
 function add(){
@@ -85,12 +92,21 @@ function remove(){
    alert("Insert Delete Logic");
 }
 
-function clicked(d) {
+function clicked(d,dur) {
+  var dura = dur;
+  if(dura == null || dura > 0){
+     dura = 750;
+  }
+  else {
+    dura = 0;
+  }
   x.domain([d.x, d.x + d.dx]);
   y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
 
   rect.transition()
-      .duration(750)
+      .duration(dura)
+      .attr("x_old", function(d) { return d.x; })
+      .attr("y_old", function(d) { return d.y; })
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y); })
       .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
