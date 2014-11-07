@@ -92,15 +92,15 @@ var arrayPath = function(target){
     return entirePath;
 }
 
-function redraw(){
-  temp = selectedObj;
-  clickMe = d3.select("#canvas").select("rect");
-  d3.select("#canvas").attr("display","none");
-  clicked(clickMe.data()[0],0);
-  d3.select("#canvas").remove();
-  draw(bigRoot);
-  d3.select("#canvas").attr("display","block");
-  clicked(temp,0);
+var searchRect = function(target){
+    var found;
+    rect[0].forEach(function(element){ // TODO: we need a way to break/exit the loop when we find target
+         //console.log("Element: ",element.__data__);
+         if(element.__data__.key == target){
+           found = element.__data__;
+         }
+    }); 
+    return found;
 }
 
 var addWithPath = function(){
@@ -124,9 +124,26 @@ var addWithPath = function(){
    return 
 }
 
+function redraw(){
+  var targetElement;
+  var currentPath = path;
+  clickMe = d3.select("#canvas").select("rect");
+  d3.select("#canvas").attr("display","none");
+  clicked(clickMe.data()[0],0);
+  d3.select("#canvas").remove();
+  draw(bigRoot);
+  if(typeof(currentPath) == "undefined" || currentPath[0] == 'goals'){
+    targetElement = searchRect('goals');
+  }
+  else{
+   targetElement = searchRect(currentPath[currentPath.length - 1]);
+  }
+  d3.select("#canvas").attr("display","block");
+  clicked(targetElement,0);
+}
 
 function add(){
-   if(typeof(path) == "undefined"){bigRoot['goals'].newTask = 4013;}
+   if(typeof(path) == "undefined" || path[0] == 'goals'){bigRoot['goals'].newTask = 4013;}
    else{addWithPath();}
    redraw();
 }
