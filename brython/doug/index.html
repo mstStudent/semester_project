@@ -13,13 +13,13 @@ rect {
      <g id="add">
         <image x="0" y="25" width="25" height="25" xlink:href="./add.svg"/>
         <text x="27" y="45" fill="black">Add Project</text>
-        <foreignObject x="27" y="45" width="155" height="50">
-           <form id="addData">
-              <input type="text" value="Name of task"></input>
-              <input type="text" value="Description of task"></input>
-           </form>
-        </foreignObject> 
      </g>
+     <foreignObject x="27" y="45" width="155" height="50">
+       <form id="addData">
+          <input type="text" placeholder="Name of task"></input>
+          <input type="text" placeholder="Description of task"></input>
+       </form>
+     </foreignObject> 
      <g id="edit">
         <image x="200" y="25" width="25" height="25" xlink:href="./pen.png"/>
         <text x="227" y="45" fill="black">Edit Project</text>
@@ -28,7 +28,6 @@ rect {
         <image x="500" y="25" width="25" height="25" xlink:href="./delete.svg"/>
         <text x="527" y="45" fill="black">Delete Project</text>
      </g>
-     <text id="temp" x="0" y="25" fill="black"><script>document.activeElement;</script></text>
 </svg>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
@@ -103,7 +102,7 @@ var searchRect = function(target){
     return found;
 }
 
-var addWithPath = function(){
+var addWithPath = function(title,text){
    var addTo = bigRoot['goals'];
    var leaf = undefined;
    path.forEach(function(obj){
@@ -115,11 +114,11 @@ var addWithPath = function(){
         }
    });
    if(typeof(leaf) != undefined){
-     addTo[leaf] = {"newTask":4013}
+     addTo[leaf] = {title:texe}
      selectedObject = addTo;
    }
    else{
-       addTo.newTask = 4013;
+       addTo[title] = text;
    }
    return 
 }
@@ -143,8 +142,17 @@ function redraw(){
 }
 
 function add(){
-   if(typeof(path) == "undefined" || path[0] == 'goals'){bigRoot['goals'].newTask = 4013;}
-   else{addWithPath();}
+   var inputs = document.getElementById("addData").getElementsByTagName("input");
+   var title = inputs[0].value;
+   var text = inputs[1].value;
+   if(title == "" || text == ""){
+     alert("Name of task and a description is required!");
+     return;
+   }
+   if(typeof(path) == "undefined" || path[0] == 'goals'){
+     bigRoot['goals'][title] = text;
+   }
+   else{addWithPath(title,text);}
    redraw();
 }
 
@@ -176,7 +184,12 @@ function clicked(d,dur) {
       .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
       .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
   selectedObj = d;
-  path = arrayPath(selectedObj);
+  if(selectedObj.key != "goals"){
+    path = arrayPath(selectedObj);
+  }
+  else{
+   path = undefined;
+  }
 }
 
 
