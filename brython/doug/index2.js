@@ -20,6 +20,8 @@ const canvasHeight = 500;
 // state keeping
 var selectedObject = null;
 var dataTree = null;
+var jsonTree = null;
+var maxId;
 
 // for partitioning
 var x = d3.scale.linear().range([0, canvasWidth]);
@@ -101,7 +103,12 @@ function clickHandler(d){
   newlySelectedDOMObject.attr("style", "fill:#FF3300;");
 }
 
-function drawTree(canvas, partitionedData){
+function drawTree(canvas, dataToPartition) {
+    d3.select("#" + canvasId).remove();
+    createCanvas();
+    var partitionedData = partition(dataToPartition);
+    dataTree = partitionedData;
+    maxId = partitionedData.length;
   // console.log("partitionedData: " + partitionedData);
   var selection = d3.select("#"+canvasId).selectAll("rect").data(partitionedData);
 
@@ -122,6 +129,7 @@ function drawTree(canvas, partitionedData){
 // create the canvas
 var canvas = createCanvas();
 
+<<<<<<< HEAD
 function addClickHandler(d){
   // find this element in the data tree (use id)
   element = depthFirstSearch(dataTree, selectedObject.id);
@@ -145,13 +153,29 @@ function addClickHandler(d){
   clearCanvas(canvas);
   drawTree(canvas, partition(dataTree));
   
+=======
+function findOwner(parentToFind) {
+    var parent;
+    if (parentToFind.name != "rootTask") { // TODO: Need to reach selectedObj in jsonTree.
+        pass;
+
+    } else {
+        return jsonTree;
+    }
 }
 
-function editClickHandler(d){
+function addClickHandler() {
+    var newTask = { "id": maxId, "name": "newTask" }
+    findOwner(selectedObject).children.push(newTask);
+  drawTree(canvas, jsonTree);
+>>>>>>> FETCH_HEAD
+}
+
+function editClickHandler(){
   console.log("edit button clicked");
 }
 
-function deleteClickHandler(d){
+function deleteClickHandler(){
   console.log("delete button clicked");
 }
 
@@ -162,10 +186,19 @@ d3.select("#" + deleteBtnId).on("click", deleteClickHandler);
 
 
 // startup run
+<<<<<<< HEAD
 d3.json(jsonFileName, function(error, root){
   // save the data to memory
   dataTree = root;
   drawTree(canvas, partition(dataTree));
+=======
+d3.json(jsonFileName, function (error, root) {
+    jsonTree = $.extend(true, {}, root); // deep copy root without referencing it.
+  // var entries = d3.entries(root)[0];
+  //console.log("attempting to partition root: " + JSON.stringify(root));
+  //console.log(dataWithLayoutInfo[0]);
+  drawTree(canvas, root);
+>>>>>>> FETCH_HEAD
 });
 
 // interactivity
