@@ -21,6 +21,7 @@ const canvasHeight = 500;
 var selectedObject = null;
 var dataTree = null;
 var addTo;
+var maxId = 0;
 
 // for partitioning
 var x = d3.scale.linear().range([0, canvasWidth]);
@@ -38,7 +39,7 @@ var partition = d3.layout.partition()
   });
 
 function depthFirstSearch(root, elementId) {
-  console.log("root.id: " + root.id + " elementId: " + elementId);
+  //console.log("root.id: " + root.id + " elementId: " + elementId);
   if(root.id == elementId){
     addTo = root;
   }else{
@@ -107,9 +108,11 @@ function clickHandler(d, duration) {
   newlySelectedDOMObject.attr("style", "fill:#FF3300;");
 }
 
-function drawTree(canvas, partitionedData){
+function drawTree(canvas, partitionedData) {
   // console.log("partitionedData: " + partitionedData);
   var selection = d3.select("#"+canvasId).selectAll("rect").data(partitionedData);
+  maxId = partitionedData.length;
+  console.log(maxId);
 
   // new dom elements
   selection.enter().append("rect")
@@ -128,13 +131,27 @@ function drawTree(canvas, partitionedData){
 // create the canvas
 var canvas = createCanvas();
 
+function removeAllAttributes(tree) {
+    delete tree.depth;
+    delete tree.dy;
+    delete tree.dx;
+    delete tree.value;
+    delete tree.x;
+    delete tree.y;
+    if (tree.children) {
+        tree.children.forEach(function (child) {
+            removeAllAttributes(child)
+        });
+    }
+}
+
 function addClickHandler(d){
   // find this element in the data tree (use id)
   element = depthFirstSearch(dataTree, selectedObject.id);
 
   // create a new element TODO: pull from the forms
   newElement = {
-    "id":6,
+      "id": maxId,
     "name":"newTask",
     "children":[]
   };
@@ -146,11 +163,21 @@ function addClickHandler(d){
     console.log("had no children, attempting to create a new array");
     element.children = [newElement];
   }
-  
+
+
   // redraw
   clearCanvas(canvas);
+
+  var realSelectedObject = selectedObject;
+
+  clickHandler(dataTree, 0)
+
+  console.log("dataTree: ", dataTree);
+  removeAllAttributes(dataTree);
+  console.log("dataTree: ", dataTree);
+
   drawTree(canvas, partition(dataTree));
-  clickHandler(selectedObject,0);
+  clickHandler(realSelectedObject, 0);
   
 }
 
@@ -170,9 +197,9 @@ d3.select("#" + deleteBtnId).on("click", deleteClickHandler);
 
 // startup run
 d3.json(jsonFileName, function(error, root){
-  // save the data to memory
-  dataTree = root;
-  drawTree(canvas, partition(dataTree));
+    // save the data to memory
+    dataTree = root;
+    drawTree(canvas, partition(dataTree));
 });
 
 // interactivity
