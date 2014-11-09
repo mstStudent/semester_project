@@ -145,14 +145,22 @@ function removeAllAttributes(tree) {
     }
 }
 
-function addClickHandler(d){
-  // find this element in the data tree (use id)
+function addClickHandler(d){ // Why do we have d here? It's undefined.
+    // find this element in the data tree (use id)
+    var inputs = document.getElementById("addData").getElementsByTagName("input");
+    var title = inputs[0].value;
+    var text = inputs[1].value;
+    if (title == "" || text == "") {
+        alert("Name of task and a description is required!");
+        return;
+    }
   element = depthFirstSearch(dataTree, selectedObject.id);
 
   // create a new element TODO: pull from the forms
   newElement = {
       "id": maxId,
-    "name":"newTask",
+      "name": title,
+      "details": text,
     "children":[]
   };
 
