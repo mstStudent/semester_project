@@ -20,6 +20,7 @@ const canvasHeight = 500;
 // state keeping
 var selectedObject = null;
 var dataTree = null;
+var addTo;
 
 // for partitioning
 var x = d3.scale.linear().range([0, canvasWidth]);
@@ -36,17 +37,18 @@ var partition = d3.layout.partition()
     return 1; 
   });
 
-function depthFirstSearch(root, elementId){
+function depthFirstSearch(root, elementId) {
   console.log("root.id: " + root.id + " elementId: " + elementId);
   if(root.id == elementId){
-    return root;
+    addTo = root;
   }else{
-    if(root.children){
-      for(var i=0; i < root.children.length; i++){
-        depthFirstSearch(root.children[i], elementId);
-      }
+      if (root.children) {
+          root.children.forEach(function (child) {
+              depthFirstSearch(child, elementId)
+          });
     }
   }
+  return addTo;
 }
 
 function dataToDOM(data)
@@ -73,7 +75,11 @@ function clearCanvas(c){
   allSVG = c.selectAll("rect").remove();
 }
 
-function clickHandler(d){
+function clickHandler(d, duration) {
+    var transTime = duration;
+    if (typeof(transTime) != "number") {
+        transTime = 500;
+    }
   // clip the width to the width of whatever was clicked
   x.domain([d.x, d.x + d.dx]);
   // make the height map from 0,1 -> 0 (or 20 for the root) to canvasHeight
@@ -82,7 +88,7 @@ function clickHandler(d){
   // grab every single rect in our canvas
   rects = d3.select("#"+canvasId).selectAll("rect");
   rects.transition()
-    .duration(500)
+    .duration(transTime)
     .attr("x_old", function(d) { return d.x; })
     .attr("y_old", function(d) { return d.y; })
     .attr("x", function(d) { return x(d.x); })
@@ -113,7 +119,7 @@ function drawTree(canvas, partitionedData){
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
     .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
-    .on("click", clickHandler);
+    .on("click", function (d) { clickHandler(d,500) });
 
   // old dom elements
   selection.exit().remove();
@@ -144,6 +150,7 @@ function addClickHandler(d){
   // redraw
   clearCanvas(canvas);
   drawTree(canvas, partition(dataTree));
+  clickHandler(selectedObject,0);
   
 }
 
