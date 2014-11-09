@@ -4,7 +4,8 @@
 	"children":[
 		{
 			"id":1,
-			"name":"childTask"
+			"name":"childTask",
+			"children":[]
 		},
 		{
 			"id":2,
@@ -12,11 +13,13 @@
 			"children":[
 				{
 					"id":3,
-					"name":"childsChild"
+					"name":"childsChild",
+					"children":[]
 				},
 				{
 					"id":4,
-					"name":"childsChild2"
+					"name":"childsChild2",
+					"children":[]
 				}
 			]
 		}
