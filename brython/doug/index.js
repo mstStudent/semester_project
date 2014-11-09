@@ -1,37 +1,3 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-rect {
-  stroke: #fff;
-}
-
-</style>
-<body>
-<svg width="960" height="100">
-     <rect width="960" height="100" style="fill:rgb(255,255,255)"/>
-     <g id="add">
-        <image x="0" y="25" width="25" height="25" xlink:href="./add.svg"/>
-        <text x="27" y="45" fill="black">Add Project</text>
-     </g>
-     <foreignObject x="27" y="45" width="155" height="50">
-       <form id="addData">
-          <input type="text" placeholder="Name of task"></input>
-          <input type="text" placeholder="Description of task"></input>
-       </form>
-     </foreignObject> 
-     <g id="edit">
-        <image x="200" y="25" width="25" height="25" xlink:href="./pen.png"/>
-        <text x="227" y="45" fill="black">Edit Project</text>
-     </g>
-     <g id="delete">
-        <image x="500" y="25" width="25" height="25" xlink:href="./delete.svg"/>
-        <text x="527" y="45" fill="black">Delete Project</text>
-     </g>
-</svg>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
-
 var bigRoot;
 
 var width = 960,
@@ -149,8 +115,8 @@ function add(){
      alert("Name of task and a description is required!");
      return;
    }
-   if(typeof(path) == "undefined" || path[0] == 'goals'){
-     bigRoot['goals'][title] = text;
+   if(typeof(path) == "undefined" || path[0] == 'rootTask'){
+     bigRoot['rootTask'][title] = text;
    }
    else{addWithPath(title,text);}
    redraw();
@@ -197,8 +163,7 @@ document.getElementById("add").addEventListener("click",function (){add();});
 document.getElementById("edit").addEventListener("click",function (){edit();});
 document.getElementById("delete").addEventListener("click",function (){remove();});
 
-d3.json("readme3.json", function(error, root) {
+d3.json("readme4.json", function(error, root) {
     bigRoot = root;
     draw(bigRoot);
 });
-</script>
