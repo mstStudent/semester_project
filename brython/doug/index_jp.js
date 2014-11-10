@@ -131,6 +131,24 @@ function drawTree(canvas, partitionedData) {
 // create the canvas
 var canvas = createCanvas();
 
+function redraw(parentOfSelectedObject) {
+    // redraw
+    clearCanvas(canvas);
+
+    var realSelectedObject = selectedObject;
+
+    if(typeof(realSelectedObject))
+
+    clickHandler(dataTree, 0)
+
+    console.log("dataTree: ", dataTree);
+    removeAllAttributes(dataTree);
+    console.log("dataTree: ", dataTree);
+
+    drawTree(canvas, partition(dataTree));
+    clickHandler(realSelectedObject, 0);
+}
+
 function removeAllAttributes(tree) {
     delete tree.depth;
     delete tree.dy;
@@ -171,30 +189,37 @@ function addClickHandler(d){ // Why do we have d here? It's undefined.
     console.log("had no children, attempting to create a new array");
     element.children = [newElement];
   }
-
-
-  // redraw
-  clearCanvas(canvas);
-
-  var realSelectedObject = selectedObject;
-
-  clickHandler(dataTree, 0)
-
-  console.log("dataTree: ", dataTree);
-  removeAllAttributes(dataTree);
-  console.log("dataTree: ", dataTree);
-
-  drawTree(canvas, partition(dataTree));
-  clickHandler(realSelectedObject, 0);
-  
+  redraw();
 }
 
 function editClickHandler(d){
   console.log("edit button clicked");
 }
 
-function deleteClickHandler(d){
-  console.log("delete button clicked");
+function deleteClickHandler(d) {
+    var deletePath = [];
+    if (selectedObject.children) {
+        if (confirm("Delete all of the tasks related to this one?") == true) {
+            console.log("yes")
+        } else {
+            console.log("no")
+        }
+    }
+    else {
+        element = depthFirstSearch(dataTree, selectedObject.id);
+        var parentElement = element.parent;
+        var index = 0;
+        parentElement.children.forEach(function (child) {
+            if (child.name != element.name) {
+                index = index + 1;
+                }
+            });
+            
+        selectedObject = element.parent;
+        element.parent.children.splice(index, 1);
+
+        redraw();
+    }
 }
 
 // add interactivity
