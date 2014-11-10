@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+rect {
+  stroke: #fff;
+}
+
+</style>
+<body>
+    <svg width="960" height="100">
+        <rect width="960" height="100" style="fill:rgb(255,255,255)" />
+        <g id="BTN_add">
+            <image x="0" y="25" width="25" height="25" xlink:href="./add.svg" />
+            <text x="27" y="45" fill="black">Add Project</text>
+        </g>
+        <foreignObject x="27" y="45" width="155" height="50">
+            <form id="addData">
+                <input type="text" placeholder="Name of task"></input>
+                <input type="text" placeholder="Description of task"></input>
+            </form>
+        </foreignObject>
+        <g id="BTN_edit">
+            <image x="200" y="25" width="25" height="25" xlink:href="./pen.png" />
+            <text x="227" y="45" fill="black">Edit Project</text>
+        </g>
+        <g id="BTN_delete">
+            <image x="500" y="25" width="25" height="25" xlink:href="./delete.svg" />
+            <text x="527" y="45" fill="black">Delete Project</text>
+        </g>
+    </svg>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
+    <script src="index_jp.js"></script>
+
