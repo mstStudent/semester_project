@@ -15,8 +15,8 @@ const fontSize = "12px";
 const fontFamily = "sans-serif";
 const PADDING_Text_x = 50;
 const PADDING_Text_y = 50;
-const canvasWidth = 960;
-const canvasHeight = 500;
+const canvasWidth = 1240;
+const canvasHeight = 700;
 
 // global variables
 // state keeping
