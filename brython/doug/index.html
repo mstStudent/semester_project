@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta charset="utf-8">
 <style>
 
@@ -8,83 +8,28 @@ rect {
 
 </style>
 <body>
-<svg width="960" height="100">
-     <rect width="960" height="100" style="fill:rgb(255,255,255)"/>
-     <g id="add">
-        <image x="0" y="65" width="25" height="25" xlink:href="./add.svg"/>
-        <text x="27" y="85" fill="black">Add Project</text>
-     </g>
-     <g id="edit">
-        <image x="200" y="65" width="25" height="25" xlink:href="./pen.png"/>
-        <text x="227" y="85" fill="black">Edit Project</text>
-     </g>
-     <g id="delete">
-        <image x="500" y="65" width="25" height="25" xlink:href="./delete.svg"/>
-        <text x="527" y="85" fill="black">Delete Project</text>
-     </g>
-</svg>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
+    <svg width="960" height="100">
+        <rect width="960" height="100" style="fill:rgb(255,255,255)" />
+        <g id="BTN_add">
+            <image x="0" y="25" width="25" height="25" xlink:href="./add.svg" />
+            <text x="27" y="45" fill="black">Add Project</text>
+        </g>
+        <foreignObject x="27" y="45" width="155" height="50">
+            <form id="addData">
+                <input type="text" placeholder="Name of task"></input>
+                <input type="text" placeholder="Description of task"></input>
+            </form>
+        </foreignObject>
+        <g id="BTN_edit">
+            <image x="200" y="25" width="25" height="25" xlink:href="./pen.png" />
+            <text x="227" y="45" fill="black">Edit Project</text>
+        </g>
+        <g id="BTN_delete">
+            <image x="500" y="25" width="25" height="25" xlink:href="./delete.svg" />
+            <text x="527" y="45" fill="black">Delete Project</text>
+        </g>
+    </svg>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
+    <script src="index_jp.js"></script>
 
-function add(){
-  alert("Insert Add Logic");
-}
-
-function edit(){
-   alert("Insert Edit Logic");
-}
-
-function remove(){
-   alert("Insert Delete Logic");
-}
-
-document.getElementById("add").addEventListener("click",function (){add();});
-document.getElementById("edit").addEventListener("click",function (){edit();});
-document.getElementById("delete").addEventListener("click",function (){remove();});
-
-var width = 960,
-    height = 500;
-
-var x = d3.scale.linear()
-    .range([0, width]);
-
-var y = d3.scale.linear()
-    .range([0, height]);
-
-var color = d3.scale.category20c();
-
-var partition = d3.layout.partition()
-    .children(function(d) { return isNaN(d.value) ? d3.entries(d.value) : null; })
-    .value(function(d) { return d.value; });
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-var rect = svg.selectAll("rect");
-
-d3.json("readme2.json", function(error, root) {
-  rect = rect
-      .data(partition(d3.entries(root)[0]))
-    .enter().append("rect")
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .attr("width", function(d) { return x(d.dx); })
-      .attr("height", function(d) { return y(d.dy); })
-      .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
-      .on("click", clicked);
-});
-
-function clicked(d) {
-  x.domain([d.x, d.x + d.dx]);
-  y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
-
-  rect.transition()
-      .duration(750)
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-      .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
-}
-
-</script>
