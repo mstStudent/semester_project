@@ -41,17 +41,6 @@ var partition = d3.layout.partition()
     return 1; 
   });
 
-function getMaxId(root){
-  if(root.id > maxId){
-    maxId = root.id;
-  }
-  if(root.children){
-    for(var i=0; i < root.children.length; i++){
-      getMaxId(root.children[i]);
-    }
-  }
-}
-
 function depthFirstSearch(root, elementId){
   console.log("DFS at: " + root.id + " looking for " + elementId);
   console.log(root.id == elementId);
@@ -143,7 +132,7 @@ function clickHandler(d){
 
   var inputs = document.getElementById("editData").getElementsByTagName("input");
   inputs[0].value = selectedObject.name;
-  if(inputs[1].value){
+  if(selectedObject.details){
      inputs[1].value = selectedObject.details;
   }
 }
@@ -193,6 +182,7 @@ function redraw(){
   // redraw
   clearCanvas(canvas);
   partitionedTree = jQuery.extend(true, {}, dataTree);
+  maxId = partition(partitionedTree).length; // We could do this BUT if uses mess with it we are screwed...unless upon uploading we assign new ids
   drawTree(canvas, partition(partitionedTree), function(){
     // zoom back to the selected object
     var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
@@ -206,7 +196,7 @@ function addClickHandler(){
   if(checkIfSelected()){alert("Select a task first!");return;}
   var inputs = document.getElementById("addData").getElementsByTagName("input");
   var title = inputs[0].value;
-  var text = inputs[1].value;
+  var text = inputs[1].value; // Need to check if we need this.
   if (title == "" || text == "") {
       alert("Name of task and a description is required!");
       return;
@@ -214,14 +204,10 @@ function addClickHandler(){
   // find this element in the data tree (use id)
   element = depthFirstSearch(dataTree, selectedObject.id);
 
-  // get a unique id
-  getMaxId(dataTree);
-  newId = maxId + 1;
-
   newElement = {
-      "id": newId,
+      "id": maxId,
       "name": title,
-  //    "details": text,  // TODO: Determine if we want this or not I'm thinking yes.
+      "details": text,  // TODO: Determine if we want this or not I'm thinking yes.
       "children":[]
   };
 
@@ -233,17 +219,6 @@ function addClickHandler(){
   }
   
   redraw();
-/*  
-  // redraw
-  clearCanvas(canvas);
-  partitionedTree = jQuery.extend(true, {}, dataTree);
-  drawTree(canvas, partition(partitionedTree), function(){
-    // zoom back to the selected object
-    var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
-    console.log(updatedObj);
-    zoomTo(updatedObj, 0);
-    updateSelectedObject(updatedObj);
-  }); */
 }
 
 function editClickHandler(){
@@ -274,11 +249,3 @@ d3.json(jsonFileName, function(error, root){
   partitionedTree = root;
   drawTree(canvas, partition(partitionedTree), null);
 });
-
-
-
-
-
-
-
-
