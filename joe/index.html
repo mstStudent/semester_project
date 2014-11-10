@@ -6,7 +6,24 @@
 rect {
   stroke: #fff;
 }
-
+    .button {
+        appearance: button;
+        -moz-appearance: button;
+        -webkit-appearance: button;
+        text-decoration: none; 
+        font: menu; 
+        color: ButtonText;
+        display: inline-block; 
+        padding: 2px 8px;
+	width:320px;
+	height:90px;
+    }
+    .form{
+    	text-decoration: none; 
+        font: menu; 
+    	display: inline-block; 
+    	padding: 2px;
+    }
 </style>
 <head>
   <script src="../js/d3.min.js"></script>
@@ -14,8 +31,20 @@ rect {
   <script src="task_jp.js"></script>
 </head>
 <body>
-<button id="BTN_add" style="width:320px;height:90px;left:0px;top:25px;" onclick="addClickHandler()">Add</button>
-<button id="BTN_edit" style="width:320px;height:90px;left:320px;top:25px;" onclick="editClickHandler()">Edit</button>
-<button id="BTN_delete" style="width:320px;height:90px;left:640px;top:25px;" onclick="deleteClickHandler()">Delete</button>
+<div id="buttons">
+<button id="BTN_add" class="button" onclick="addClickHandler()">Add</button>
+<button id="BTN_edit" class="button" onclick="editClickHandler()">Edit</button>
+<button id="BTN_delete" class="button" onclick="deleteClickHandler()">Delete</button>
+</div>
+<div id="forms">
+<form id="addData" class="form">
+                <input type="text" placeholder="Name of task"></input>
+                <input type="text" placeholder="Description of task"></input>
+</form>
+<form id="editData" class="form" style="padding-left:7px">
+                <input type="text" placeholder="Name of task"></input>
+                <input type="text" placeholder="Description of task"></input>
+</form>
+</div>
 </body>
 </html>
