@@ -121,17 +121,6 @@ function zoomTo(d, duration){
     .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
     .attr("y", function(d) { return y(d.y) + PADDING_Text_y; })
   
-  /*
-  rects = d3.select("#" + canvasId).selectAll("rect");
-  rects.transition()
-    .duration(duration)
-    .attr("x_old", function(d) { return d.x; })
-    .attr("y_old", function(d) { return d.y; })
-    .attr("x", function(d) { return x(d.x); })
-    .attr("y", function(d) { return y(d.y); })
-    .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-    .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
-    */
 }
 
 function updateSelectedObject(d){
@@ -151,6 +140,12 @@ function clickHandler(d){
 
   // tag this as the selected object and highlight it
   updateSelectedObject(d);
+
+  var inputs = document.getElementById("editData").getElementsByTagName("input");
+  inputs[0].value = selectedObject.name;
+  if(inputs[1].value){
+     inputs[1].value = selectedObject.details;
+  }
 }
 
 function drawTree(canvas, partitionedData, completionHandler){
@@ -189,7 +184,26 @@ function drawTree(canvas, partitionedData, completionHandler){
   }
 }
 
-function addClickHandler(d){
+function checkIfSelected(){ // Check if anything is selected
+         return (selectedObject == null)
+	 
+}
+
+function redraw(){
+  // redraw
+  clearCanvas(canvas);
+  partitionedTree = jQuery.extend(true, {}, dataTree);
+  drawTree(canvas, partition(partitionedTree), function(){
+    // zoom back to the selected object
+    var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
+    console.log(updatedObj);
+    zoomTo(updatedObj, 0);
+    updateSelectedObject(updatedObj);
+  });
+}
+
+function addClickHandler(){
+  if(checkIfSelected()){alert("Select a task first!");return;}
   var inputs = document.getElementById("addData").getElementsByTagName("input");
   var title = inputs[0].value;
   var text = inputs[1].value;
@@ -218,6 +232,8 @@ function addClickHandler(d){
     element.children = [newElement];
   }
   
+  redraw();
+/*  
   // redraw
   clearCanvas(canvas);
   partitionedTree = jQuery.extend(true, {}, dataTree);
@@ -227,14 +243,27 @@ function addClickHandler(d){
     console.log(updatedObj);
     zoomTo(updatedObj, 0);
     updateSelectedObject(updatedObj);
-  }); 
+  }); */
 }
 
-function editClickHandler(d){
-  console.log("edit button clicked");
+function editClickHandler(){
+  if(checkIfSelected()){alert("Select a task first!");return;}
+  var inputs = document.getElementById("editData").getElementsByTagName("input");
+  var title = inputs[0].value;
+  var text = inputs[1].value;
+  if (title == "") {
+      alert("A task name is required!");
+      return;
+  }
+  // find this element in the data tree (use id)
+  element = depthFirstSearch(dataTree, selectedObject.id);  
+  element.name = title;
+  element.details = text; 
+  redraw();
 }
 
 function deleteClickHandler(d){
+  if(checkIfSelected()){alert("Select a task first!");return;}
   console.log("delete button clicked");
 }
 
