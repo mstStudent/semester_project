@@ -179,19 +179,6 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("font-family", fontFamily)
     .attr("font-size", fontSize)
     .attr("fill", "black");
-  
-  /*
-  var rects = d3.select("#" + canvasId).selectAll("rect").data(partitionedData);
-  rects.enter().append("rect")
-    .attr("id", function(d){ return taskIdPrefix + d.id; })
-    .attr("x", function(d) { return x(d.x); })
-    .attr("y", function(d) { return y(d.y); })
-    .attr("width", function(d) { return x(d.dx); })
-    .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
-    .on("click", clickHandler)
-    */
-
 
   // old dom elements
   theGroups.exit().remove();
@@ -203,20 +190,25 @@ function drawTree(canvas, partitionedData, completionHandler){
 }
 
 function addClickHandler(d){
+  var inputs = document.getElementById("addData").getElementsByTagName("input");
+  var title = inputs[0].value;
+  var text = inputs[1].value;
+  if (title == "" || text == "") {
+      alert("Name of task and a description is required!");
+      return;
+  }
   // find this element in the data tree (use id)
   element = depthFirstSearch(dataTree, selectedObject.id);
-
-  // create a new element 
-  // TODO: pull from the forms
 
   // get a unique id
   getMaxId(dataTree);
   newId = maxId + 1;
 
   newElement = {
-    "id":newId,
-    "name":"newTask",
-    "children":[]
+      "id": newId,
+      "name": title,
+  //    "details": text,  // TODO: Determine if we want this or not I'm thinking yes.
+      "children":[]
   };
 
   // push to its children
@@ -245,13 +237,6 @@ function editClickHandler(d){
 function deleteClickHandler(d){
   console.log("delete button clicked");
 }
-
-// add menu interactivity
-console.log("about to add interactivity");
-//d3.select("#" + addBtnId).on("click", addClickHandler);
-//d3.select("#" + editBtnId).on("click", editClickHandler);
-//d3.select("#" + deleteBtnId).on("click", deleteClickHandler);
-console.log("success!");
 
 // startup run
 d3.json(jsonFileName, function(error, root){
