@@ -237,9 +237,31 @@ function editClickHandler(){
   redraw();
 }
 
-function deleteClickHandler(d){
-  if(checkIfSelected()){alert("Select a task first!");return;}
-  console.log("delete button clicked");
+function deleteClickHandler(){
+    if (checkIfSelected()) { alert("Select a task first!"); return; }
+    var parent = depthFirstSearch(dataTree, selectedObject.parent.id);
+    var selectedParent = selectedObject.parent;
+    if (selectedObject.children) {
+        if(confirm("Delete all tasks below this one?"))
+        {
+            console.log("Yes");
+        } else {
+            console.log("No");   
+            alert("Canceling deletion. Delete the lower tasks first");
+            return;
+        }
+    }
+    parent.children.forEach(function (child, index) {
+        if (child.name == selectedObject.name) {
+            parent.children.splice(index, 1);
+            selectedParent.children.splice(index,1)
+        }
+    });
+
+    console.log("delete button clicked");
+    selectedObject = selectedParent;
+//    clickHandler(selectedObject.parent);
+    redraw();
 }
 
 // startup run
