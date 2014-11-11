@@ -4,7 +4,7 @@
 // Purpose: a reorganized version of the index code
 
 // global constants
-const jsonFileName = "doug_test.json";
+const jsonFileName = "index.json";
 const canvasId = "canvas";
 const addBtnId = "BTN_add";
 const editBtnId = "BTN_edit";
@@ -53,8 +53,6 @@ function getMaxId(root){
 }
 
 function depthFirstSearch(root, elementId){
-  console.log("DFS at: " + root.id + " looking for " + elementId);
-  console.log(root.id == elementId);
   if(root.id == elementId){
     return root;
   }else{
@@ -70,16 +68,33 @@ function depthFirstSearch(root, elementId){
   }
 }
 
+function unpartition(root){
+  // remove added attributes from here: https://github.com/mbostock/d3/wiki/Partition-Layout
+  delete root.parent;
+  // delete root.children; we don't do because we want to keep that property
+  delete root.value;
+  delete root.depth;
+  delete root.x;
+  delete root.y;
+  delete root.dx;
+  delete root.dy;
+
+  // recursive call
+  if(root.children){
+    root.children.forEach(function(child){
+      unpartition(child);
+    });
+  }
+}
+
 function dataToDOM(data){
   var selectorString = "#" + taskIdPrefix + data.id;
   domElement = d3.select(selectorString);
+
   return domElement;
 }
 
 function createCanvas(){
-  
-  // TODO: add an onclick to the canvas so that people can select it to
-  // add more roots
   var localCanvas = d3.select("body").append("svg")
     .attr("width", canvasWidth)
     .attr("height", canvasHeight)
@@ -232,7 +247,6 @@ function addClickHandler(d){
   drawTree(canvas, partition(partitionedTree), function(){
     // zoom back to the selected object
     var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
-    console.log(updatedObj);
     zoomTo(updatedObj, 0);
     updateSelectedObject(updatedObj);
   }); 
@@ -243,15 +257,31 @@ function editClickHandler(d){
 }
 
 function deleteClickHandler(d){
-  console.log("delete button clicked");
-}
+  var deletePath = [];
+  if(selectedObject.children){
+    if(confirm("Delete all of the tasks related to this one?") == true){
+      console.log("yes")
+    }else{
+      console.log("no")
+    }
+  }else{
+    element = depthFirstSearch(partitionedTree, selectedObject.id);
+    var parentElement = element.parent;
+    var index = 0;
+    parentElement.children.forEach(function(child){
+      if(child.name != element.name){
+        index = index + 1;
+      }
+    });
+        
+    selectedObject = element.parent;
+    element.parent.children.splice(index, 1);
 
-// add menu interactivity
-console.log("about to add interactivity");
-//d3.select("#" + addBtnId).on("click", addClickHandler);
-//d3.select("#" + editBtnId).on("click", editClickHandler);
-//d3.select("#" + deleteBtnId).on("click", deleteClickHandler);
-console.log("success!");
+    clearCanvas(canvas);
+    partitionedTree = jQuery.extend(true, {}, dataTree);
+    drawTree(cavnas, partition(partitionedTree));
+  }
+}
 
 // startup run
 d3.json(jsonFileName, function(error, root){
