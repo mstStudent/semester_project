@@ -28,21 +28,21 @@ rect {
 </head>
 <body>
     <div class="button">
-        <button id="BTN_add"  onclick="addClickHandler()">Add</button>
+        <button id="BTN_add"  onclick="addClickHandler(); redraw();">Add</button>
         <form id="addData" class="form">
             <input type="text" placeholder="Name of task"></input>
             <input type="text" placeholder="Description of task"></input>
         </form>
     </div>
     <div class ="button">
-        <button id="BTN_edit" onclick="editClickHandler()">Edit</button>
+        <button id="BTN_edit" onclick="editClickHandler(); redraw();">Edit</button>
         <form id="editData" class="form">
             <input type="text" placeholder="Name of task"></input>
             <input type="text" placeholder="Description of task"></input>
         </form>
     </div>
     <div class="button" style="position:absolute; top:10px">
-        <button id="BTN_delete" onclick=" deleteClickHandler()">Delete</button>
+        <button id="BTN_delete" onclick="deleteClickHandler(); redraw();">Delete</button>
     </div>
 </body>
 </html>

@@ -1,22 +1,17 @@
 // Programmer: Doug Melville, Joseph Pantoga
-// Date: November 8, 2014
-// File: index2.js
-// Purpose: a reorganized version of the index code
+// Date: November 11, 2014
 
 // global constants
 const jsonFileName = "demo.json";
 const canvasId = "canvas";
-const addBtnId = "BTN_add";
-const editBtnId = "BTN_edit";
-const deleteBtnId = "BTN_delete";
 const taskIdPrefix = "task";
 const taskContainerType = "g";
 const fontSize = "12px";
 const fontFamily = "sans-serif";
 const PADDING_Text_x = 50;
 const PADDING_Text_y = 50;
-const canvasWidth = 960;
-const canvasHeight = 500;
+const canvasWidth = 1240;
+const canvasHeight = 700;
 
 // global variables
 // state keeping
@@ -41,6 +36,7 @@ var partition = d3.layout.partition()
     return 1; 
   });
 
+// Finds element within supplied tree/object
 function depthFirstSearch(root, elementId){
   console.log("DFS at: " + root.id + " looking for " + elementId);
   console.log(root.id == elementId);
@@ -67,8 +63,8 @@ function dataToDOM(data){
 
 function createCanvas(){
   
-  // TODO: add an onclick to the canvas so that people can select it to
-  // add more roots
+  // TODO: add an onclick to the canvas so that people can select it to add more roots
+  // TODO NOTE: To do this task we might need to have the system split the canvas evenly bewteen x partitions, unless someone can get partition to work correctly with two actual roots, I can't. 
   var localCanvas = d3.select("body").append("svg")
     .attr("width", canvasWidth)
     .attr("height", canvasHeight)
@@ -112,27 +108,25 @@ function zoomTo(d, duration){
   
 }
 
+// Tags d as the selectedObject and highlights it red for users
 function updateSelectedObject(d){
-  if(selectedObject){
-    lastSelectedDOMObject = dataToDOM(selectedObject);
-    lastSelectedDOMObject.attr("style", "");
+  if(selectedObject){ 
+    dataToDOM(selectedObject).attr("style", "");
   }
-
   selectedObject = d;
-  newlySelectedDOMObject = dataToDOM(selectedObject);
-  newlySelectedDOMObject.attr("style", "fill:#FF3300;");
+  dataToDOM(selectedObject).attr("style", "fill:#FF3300;");
 }
 
-function clickHandler(d){
-  // zoom to this data
+function clickHandler(d) {
+  // zoom to selected object.
   zoomTo(d, 250);
 
-  // tag this as the selected object and highlight it
   updateSelectedObject(d);
 
+  // Updates edit's form to reflect the data in the selected object.
   var inputs = document.getElementById("editData").getElementsByTagName("input");
   inputs[0].value = selectedObject.name;
-  if(selectedObject.details){
+  if(selectedObject.details){ // I personally I don't like it when the box says 'undefined'
      inputs[1].value = selectedObject.details;
   }
 }
@@ -146,7 +140,7 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("y", function(d) { return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    
+  // Create rectangle  
   newGroups.append("rect")
     .attr("id", function(d){ return taskIdPrefix + d.id; })
     .attr("x", function(d) { return x(d.x); })
@@ -155,7 +149,7 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("height", function(d) { return y(d.dy); })
     .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
     .on("click", clickHandler)
-
+  // Add text to rectangle
   newGroups.append("text")
     .text(function(d) { return d.name; })
     .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
@@ -173,16 +167,11 @@ function drawTree(canvas, partitionedData, completionHandler){
   }
 }
 
-function checkIfSelected(){ // Check if anything is selected
-         return (selectedObject == null)
-	 
-}
-
+// Redrawing the canvas with the new/updated dataTree.
 function redraw(){
-  // redraw
   clearCanvas(canvas);
   partitionedTree = jQuery.extend(true, {}, dataTree);
-  maxId = partition(partitionedTree).length; // We could do this BUT if uses mess with it we are screwed...unless upon uploading we assign new ids
+  maxId = partition(partitionedTree).length; // We could do this BUT if users mess with it we are screwed...unless upon uploading we assign new ids
   drawTree(canvas, partition(partitionedTree), function(){
     // zoom back to the selected object
     var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
@@ -192,16 +181,18 @@ function redraw(){
   });
 }
 
-function addClickHandler(){
-  if(checkIfSelected()){alert("Select a task first!");return;}
+function addClickHandler(){ // TODO: if too many items are added then the text starts to get out of line.
+  if (selectedObject == null) { alert("Select a task first!"); return; } // Check if anything is selected
+
   var inputs = document.getElementById("addData").getElementsByTagName("input");
   var title = inputs[0].value;
   var text = inputs[1].value; // Need to check if we need this.
-  if (title == "" || text == "") {
-      alert("Name of task and a description is required!");
+
+  if (title == "") {
+      alert("The name of the task is required!");
       return;
   }
-  // find this element in the data tree (use id)
+
   element = depthFirstSearch(dataTree, selectedObject.id);
 
   newElement = {
@@ -211,57 +202,63 @@ function addClickHandler(){
       "children":[]
   };
 
-  // push to its children
+  // push to its children, we need to do one of two methods which depend on whether or not it has children now.
   if(element.children){
     element.children.push(newElement);
   }else{
     element.children = [newElement];
   }
-  
-  redraw();
 }
 
 function editClickHandler(){
-  if(checkIfSelected()){alert("Select a task first!");return;}
-  var inputs = document.getElementById("editData").getElementsByTagName("input");
+  if (selectedObject == null) { alert("Select a task first!"); return; } // Check if anything is selected
+
+  var inputs = document.getElementById("editData").getElementsByTagName("input"); // This gives us an array of the inputs of editData
   var title = inputs[0].value;
   var text = inputs[1].value;
-  if (title == "") {
-      alert("A task name is required!");
+
+  if (title == "") { // Titles can't be blank so we enforce this rule here.
+      alert("The title can't be blank!");
       return;
   }
-  // find this element in the data tree (use id)
+  if (title == selectedObject.name) { // no point in redrawing or anything if nothing changed.
+      console.log("The title didn't change.");
+      if (selectedObject.details) {
+          if (text == selectedObject.details) {
+              console.log("The details didn't change either");
+              return;
+          }
+      }
+  }
+
+  // If something is different then we will update that element and then redraw.
   element = depthFirstSearch(dataTree, selectedObject.id);  
   element.name = title;
   element.details = text; 
-  redraw();
 }
 
-function deleteClickHandler(){
-    if (checkIfSelected()) { alert("Select a task first!"); return; }
+function deleteClickHandler(){ // BUG: canvas goes black if you delete the last child in rootTask. We need to fix this or somehow avoid this case.
+    if (selectedObject == null) { alert("Select a task first!"); return; } // Check if anything is selected
+
+    // Getting these two items allow delete to work
     var parent = depthFirstSearch(dataTree, selectedObject.parent.id);
-    var selectedParent = selectedObject.parent;
-    if (selectedObject.children) {
-        if(confirm("Delete all tasks below this one?"))
+    var selectedParent = selectedObject.parent; // This reduces errors in deletion
+
+    if (selectedObject.children) { // Does the selected node have children?
+        if(!confirm("Delete all tasks below this one?")) // If the user says no, then we alert the user what they can do, and then cancel the function.
         {
-            console.log("Yes");
-        } else {
-            console.log("No");   
             alert("Canceling deletion. Delete the lower tasks first");
             return;
         }
     }
+    // Find the index for the child 
     parent.children.forEach(function (child, index) {
-        if (child.name == selectedObject.name) {
-            parent.children.splice(index, 1);
-            selectedParent.children.splice(index,1)
+        if (child.name == selectedObject.name) { 
+            parent.children.splice(index, 1); // Updates dataTree
+            selectedParent.children.splice(index,1) // Updates selectedObject's parent. This reduces errors that can come up in redraw.
         }
     });
-
-    console.log("delete button clicked");
-    selectedObject = selectedParent;
-//    clickHandler(selectedObject.parent);
-    redraw();
+    selectedObject = selectedParent; // We can't reselect the deleted task now can we.
 }
 
 // startup run
