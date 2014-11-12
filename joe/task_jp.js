@@ -171,7 +171,7 @@ function drawTree(canvas, partitionedData, completionHandler){
 function redraw(){
   clearCanvas(canvas);
   partitionedTree = jQuery.extend(true, {}, dataTree);
-  maxId = partition(partitionedTree).length; // We could do this BUT if users mess with it we are screwed...unless upon uploading we assign new ids
+  maxId = partition(partitionedTree).length; // This screws up delete 
   drawTree(canvas, partition(partitionedTree), function(){
     // zoom back to the selected object
     var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
