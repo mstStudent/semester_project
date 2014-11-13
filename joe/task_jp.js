@@ -21,6 +21,9 @@ var partitionedTree = null;
 var canvas = null;
 var maxId = Number.NEGATIVE_INFINITY;
 
+var addColor;
+var editColor;
+
 var getMaxId = function(root){
   if(root.id > maxId){
     maxId = root.id;
@@ -47,6 +50,30 @@ var partition = d3.layout.partition()
     return 1; 
   });
 
+function addWheel(){
+ var acw = Raphael.colorwheel($("#addColorWheel .colorwheel")[0],100);
+ var temp = acw.color;
+ 
+ var setColor = function(){
+     addColor = temp();
+     console.log("addColor: ",addColor);
+ }
+
+ acw.ondrag(setColor,setColor);
+ acw.input($("#addColorWheel input")[0]);
+}
+
+function editWheel(){
+   var ecw = Raphael.colorwheel($("#editColorWheel .colorwheel")[0],100);
+   var temp = ecw.color;
+   var setColor = function(){
+     editColor = temp();
+     console.log("editColor: ",editColor);
+   }
+   ecw.ondrag(setColor,setColor);
+   ecw.input($("#editColorWheel input")[0]);
+   
+}
 // Finds element within supplied tree/object
 function depthFirstSearch(root, elementId){
   console.log("DFS at: " + root.id + " looking for " + elementId);
@@ -133,7 +160,7 @@ function updateSelectedObject(d){
     dataToDOM(selectedObject).attr("style", "");
   }
   selectedObject = d;
-  dataToDOM(selectedObject).attr("style", "fill:#FF3300;");
+  $(dataToDOM(selectedObject)[0][0]).fadeTo(0,0.8,function(){}); // In order to test colors in every case we need a new "highlight" so I'm using JQuery to reduce the opacity of the selected item a tad.
 }
 
 function clickHandler(d) {
@@ -166,7 +193,7 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("y", function(d) { return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
+    .attr("fill", function(d) { return d.color ? d.color : color((d.children ? d : d.parent).key); }) // Does d have a color tag? if not copy parent's color.
     .on("click", clickHandler)
   // Add text to rectangle
   newGroups.append("text")
@@ -233,6 +260,7 @@ function addClickHandler(){ // TODO: if too many items are added then the text s
       "id": maxId + 1,
       "name": title,
       "details": text,  // TODO: Determine if we want this or not I'm thinking yes.
+      "color": addColor.hex,
       "children":[]
   };
   
@@ -261,8 +289,16 @@ function editClickHandler(){
       console.log("The title didn't change.");
       if (selectedObject.details) {
           if (text == selectedObject.details) {
-              console.log("The details didn't change either");
-              return;
+             if(selectedObject.color){
+               if(editColor == selectedObject.color){
+                 console.log("All details didn't change");
+                 return;
+               }
+             }
+             else{
+               console.log("The text didn't change");
+               return;
+             }
           }
       }
   }
@@ -271,6 +307,7 @@ function editClickHandler(){
   element = depthFirstSearch(dataTree, selectedObject.id);  
   element.name = title;
   element.details = text; 
+  element.color = editColor;
 }
 
 function deleteClickHandler(){ // BUG: canvas goes black if you delete the last child in rootTask. We need to fix this or somehow avoid this case.
@@ -304,3 +341,5 @@ d3.json(jsonFileName, function(error, root){
   partitionedTree = root;
   drawTree(canvas, partition(partitionedTree), null);
 });
+addWheel();
+editWheel();

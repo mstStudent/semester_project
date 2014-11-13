@@ -11,7 +11,8 @@ rect {
         font: menu; 
         color: ButtonText;
         display: inline-block; 
-        padding-bottom: 40px;
+        padding-bottom: 70px;
+        padding-right: 200px;
 	width:200px;
 	height:30px;
     }
@@ -24,7 +25,7 @@ rect {
 <head>
   <script src="../js/d3.min.js"></script>
   <script src="../js/jquery-2.1.1.min.js"></script>
-  <script src="task_jp.js"></script>
+  <script src="../js/raphael-min.js"></script>
 </head>
 <body>
     <div class="button">
@@ -33,6 +34,10 @@ rect {
             <input type="text" placeholder="Name of task"></input>
             <input type="text" placeholder="Description of task"></input>
         </form>
+        <div id="addColorWheel" style="left: 180px; position: absolute; top: 0px">
+          <div class="colorwheel"></div>
+              <input size="7" style="position: absolute;top: 0px;left: 100px;"></input>
+        </div>
     </div>
     <div class ="button">
         <button id="BTN_edit" onclick="editClickHandler(); redraw();">Edit</button>
@@ -40,9 +45,15 @@ rect {
             <input type="text" placeholder="Name of task"></input>
             <input type="text" placeholder="Description of task"></input>
         </form>
+        <div id="editColorWheel" style="left: 600px; position: absolute; top: 0px">
+          <div class="colorwheel"></div>
+              <input size="7" style="position: absolute;top: 0px;left: 100px;"></input>
+        </div>
     </div>
     <div class="button" style="position:absolute; top:10px">
         <button id="BTN_delete" onclick="deleteClickHandler(); redraw();">Delete</button>
     </div>
 </body>
+  <script src="../js/colorwheel.min.js"></script>
+  <script src="task_jp.js"></script>
 </html>
