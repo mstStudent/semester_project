@@ -21,6 +21,17 @@ var partitionedTree = null;
 var canvas = null;
 var maxId = Number.NEGATIVE_INFINITY;
 
+var getMaxId = function(root){
+  if(root.id > maxId){
+    maxId = root.id;
+  }
+  if(root.children){
+    for(var i=0; i < root.children.length; i++){
+      getMaxId(root.children[i]);
+    }
+  }
+}
+
 // for partitioning
 var x = d3.scale.linear().range([0, canvasWidth]);
 var y = d3.scale.linear().range([0, canvasHeight]);
@@ -171,7 +182,9 @@ function drawTree(canvas, partitionedData, completionHandler){
 function redraw(){
   clearCanvas(canvas);
   partitionedTree = jQuery.extend(true, {}, dataTree);
-  maxId = partition(partitionedTree).length; // This screws up delete 
+  if(maxId < 0){
+    maxId = partition(partitionedTree).length; // This screws up delete 
+  }
   drawTree(canvas, partition(partitionedTree), function(){
     // zoom back to the selected object
     var updatedObj = depthFirstSearch(partitionedTree, selectedObject.id);
@@ -195,12 +208,17 @@ function addClickHandler(){ // TODO: if too many items are added then the text s
 
   element = depthFirstSearch(dataTree, selectedObject.id);
 
+  // get a unique id
+  getMaxId(dataTree);
+  
   newElement = {
-      "id": maxId,
+      "id": maxId + 1,
       "name": title,
       "details": text,  // TODO: Determine if we want this or not I'm thinking yes.
       "children":[]
   };
+  
+  maxId = maxId + 1; 
 
   // push to its children, we need to do one of two methods which depend on whether or not it has children now.
   if(element.children){
@@ -253,7 +271,7 @@ function deleteClickHandler(){ // BUG: canvas goes black if you delete the last 
     }
     // Find the index for the child 
     parent.children.forEach(function (child, index) {
-        if (child.name == selectedObject.name) { 
+        if (child.id == selectedObject.id) { 
             parent.children.splice(index, 1); // Updates dataTree
             selectedParent.children.splice(index,1) // Updates selectedObject's parent. This reduces errors that can come up in redraw.
         }
