@@ -109,13 +109,21 @@ function zoomTo(d, duration){
     .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
     .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
 
-  texts = d3.select("#"+canvasId).selectAll("text");
-  texts.transition()
+  titles = d3.select("#"+canvasId).selectAll("text.title");
+  titles.transition()
     .duration(duration)
     .attr("x_old", function(d) { return d.x; })
     .attr("y_old", function(d) { return d.y; })
     .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
     .attr("y", function(d) { return y(d.y) + PADDING_Text_y; })
+
+ descriptiions = d3.select("#"+canvasId).selectAll("text.details");
+  descriptiions.transition()
+    .duration(duration)
+    .attr("x_old", function(d) { return d.x; })
+    .attr("y_old", function(d) { return d.y; })
+    .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
+    .attr("y", function(d) { return y(d.y) + PADDING_Text_y + 45; })
   
 }
 
@@ -163,8 +171,18 @@ function drawTree(canvas, partitionedData, completionHandler){
   // Add text to rectangle
   newGroups.append("text")
     .text(function(d) { return d.name; })
+    .attr("class","title")
     .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
     .attr("y", function(d) { return y(d.y) + PADDING_Text_y; })
+    .attr("font-family", fontFamily)
+    .attr("font-size", fontSize)
+    .attr("fill", "black");
+
+  newGroups.append("text")
+    .text(function(d) { return d.details; })
+    .attr("class","details")
+    .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
+    .attr("y", function(d) { return y(d.y) + PADDING_Text_y + 45; })
     .attr("font-family", fontFamily)
     .attr("font-size", fontSize)
     .attr("fill", "black");
