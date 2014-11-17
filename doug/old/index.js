@@ -169,16 +169,19 @@ function clickHandler(d){
 }
 
 function drawTree(canvas, partitionedData, completionHandler){
-  var theGroups = d3.select("#"+canvasId).selectAll(taskContainerType).data(partitionedData);
+  var theGroups = d3.select("#"+canvasId).selectAll("rect").data(partitionedData);
 
   // new dom element
+  /*
   var newGroups = theGroups.enter().append(taskContainerType)
     .attr("x", function(d) { return x(d.x); })
     .attr("y", function(d) { return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
+    */
     
-  newGroups.append("rect")
+  console.log(theGroups.enter());
+  theGroups.enter().append("rect")
     .attr("id", function(d){ return taskIdPrefix + d.id; })
     .attr("x", function(d) { return x(d.x); })
     .attr("y", function(d) { return y(d.y); })
@@ -187,6 +190,7 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("fill", function(d) { return color((d.children ? d : d.parent).key); })
     .on("click", clickHandler)
 
+    /*
   newGroups.append("text")
     .text(function(d) { return d.name; })
     .attr("x", function(d) { return x(d.x) + PADDING_Text_x; })
@@ -194,6 +198,7 @@ function drawTree(canvas, partitionedData, completionHandler){
     .attr("font-family", fontFamily)
     .attr("font-size", fontSize)
     .attr("fill", "black");
+    */
   
   /*
   var rects = d3.select("#" + canvasId).selectAll("rect").data(partitionedData);
@@ -286,7 +291,7 @@ function deleteClickHandler(d){
 // startup run
 d3.json(jsonFileName, function(error, root){
   canvas = createCanvas();
-  dataTree = jQuery.extend(true, {}, root);
+  // dataTree = jQuery.extend(true, {}, root);
   partitionedTree = root;
   drawTree(canvas, partition(partitionedTree), null);
 });

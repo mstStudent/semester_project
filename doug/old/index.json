@@ -1,29 +1,24 @@
 {
 	"id":0,
 	"name":"rootTask",
-	"description":"the root",
 	"children":[
 		{
 			"id":1,
 			"name":"childTask",
-			"description":"the first child",
 			"children":[]
 		},
 		{
 			"id":2,
 			"name":"childTask2",
-			"description":"the second child",
 			"children":[
 				{
 					"id":3,
 					"name":"childsChild",
-					"description":"my grandchild",
 					"children":[]
 				},
 				{
 					"id":4,
 					"name":"childsChild2",
-					"description":"my other grandchild",
 					"children":[]
 				}
 			]
