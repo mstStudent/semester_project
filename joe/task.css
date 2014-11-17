@@ -1,0 +1,18 @@
+/*
+  The Color wheel acts really oddly if you dont use relative
+    position and use the provided numbers ( the system will think 
+    that the color wheel is lower and more to the right than what the
+    user can see.
+*/
+#colorWheel{
+  left: 260px; 
+  position: relative; 
+  top: -180px;
+}
+
+#wheelText{
+  left: 425px;
+  position: absolute;
+  top: 100px;
+
+}
