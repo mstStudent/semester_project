@@ -103,10 +103,6 @@ function updateSelectedData(d){
 	.attr("opacity", "0.7");
 }
 
-function onClick_TaskRect(d){
-	updateSelectedData(d);
-}
-
 function zoomTo(d, duration){
 	// remove the menu if we're giving up on editing for some reason
 	var menu = d3.select("#" + ID_Menu);
@@ -124,8 +120,8 @@ function zoomTo(d, duration){
 	.attr("y_old", function(d) { return d.y; })
 	.attr("x", function(d) { return x(d.x); })
 	.attr("y", function(d) { return y(d.y); })
-//	.attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-//	.attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+	.attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+	.attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
 
 	d3.selectAll("."+CLASS_TXT_Name).transition().duration(duration)
 	.attr("user-select", "none")
@@ -192,7 +188,7 @@ function drawTree(c, t){
 	.attr("id", function(d){ return (ID_PRFX_Task + d.id); })
     
     g.append("rect")
-    .on("click", onClick_TaskRect)
+    .on("click", function(d){updateSelectedData(d);})
     .on("dblclick", onDblclick_TaskRect)
     .attr("class", CLASS_Task)
     .attr("x", function(d){ return x(d.x); })
