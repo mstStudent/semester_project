@@ -5,14 +5,14 @@
     user can see.
 */
 #colorWheel{
-  left: 260px; 
+  left: 280px; 
   position: relative; 
-  top: -180px;
+  top: -140px;
 }
 
 #wheelText{
-  left: 425px;
-  position: absolute;
-  top: 100px;
+  left: 395px;
+  position: relative;
+  top: -230px;
 
 }

@@ -69,7 +69,7 @@ function addButtons(){
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("add")
-	.on("click", onClick_Add);
+	.on("click", function(){myAdd(selectedData);});
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Edit)
@@ -79,7 +79,7 @@ function addButtons(){
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("edit")
-	.on("click", onClick_Edit);
+	.on("click", function(){myEdit(selectedData);});
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Delete)
@@ -89,19 +89,7 @@ function addButtons(){
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
-	.on("click", onClick_Delete);
-}
-
-function onClick_Add(){
-	myAdd(selectedData);
-}
-
-function onClick_Edit(){
-	myEdit(selectedData);
-}
-
-function onClick_Delete(){
-	myDelete(selectedData);
+	.on("click", function(){myDelete(selectedData);});
 }
 
 function updateSelectedData(d){
@@ -136,8 +124,8 @@ function zoomTo(d, duration){
 	.attr("y_old", function(d) { return d.y; })
 	.attr("x", function(d) { return x(d.x); })
 	.attr("y", function(d) { return y(d.y); })
-	.attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-	.attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+//	.attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+//	.attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
 
 	d3.selectAll("."+CLASS_TXT_Name).transition().duration(duration)
 	.attr("user-select", "none")
@@ -184,7 +172,7 @@ function drawTree(c, t){
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return (d.color ? d.color : "blue"); });
+    .attr("fill", function(d) { return color(d.color ? d.color : "blue"); });
 
     s.select("." + CLASS_TXT_Name).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
@@ -211,7 +199,7 @@ function drawTree(c, t){
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return (d.color ? d.color : "blue"); });
+    .attr("fill", function(d) { return color(d.color ? d.color : "blue"); });
 
     g.append("text")
     .attr("class", CLASS_TXT_Name)
@@ -246,17 +234,19 @@ function newTask(){
 function updateFromForm(d){
         var newName = document.getElementById("titleInput").value;
         var newDetails = document.getElementById("desTextArea").value;
-        if(newName){
-		d.name = newName;
-        }
-        if(newDetails){
-		d.description = newDetails;
-        }
-        if(addColor){
-		d.color = addColor.toString();
-        }
+
+        newName ? d.name = newName : console.log("Name didn't change.");
+        newDetails ? d.description = newDetails: console.log("Details didn't change.");
+        addColor ? d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString()) : console.log("Color didn't change.");
+        if(newName && newDetails && addColor){
+		console.log("Something Changed");
+	}else{
+		console.log("Nothing Changed");
+		d3.select("#menu").remove();
+		return
+	}
 	drawTree(canvas, partition(taskTree));
-	d3.select("#inputForm").remove();
+        d3.select("#menu").remove(); 
 	zoomTo(d, DUR_Update);
 }
 
@@ -266,22 +256,22 @@ function showForm(d){
 	.attr("id", ID_Menu)
 	.attr("x", x(d.x) + PAD_Menu_X)
 	.attr("y", y(d.y) + PAD_Menu_Y)
-	.attr("width", 250)
-	.attr("height", y(d.y + d.dy) - y(d.y) - 2*PAD_Menu_Y)
+	.attr("width", 475)
+	.attr("height", 325)
 	.append("xhtml:body")
 	.append("form");
 
 	form.append("input")
 	.attr("id", "titleInput")
 	.attr("type", "text")
-	.attr("size", 13)
+	.attr("size", 14)
 	.attr("placeholder", d.name)
 	.style("font-size", "32px");
 
 	form.append("textarea")
 	.attr("id", "desTextArea")
 	.attr("rows", 3)
-	.attr("cols", 12)
+	.attr("cols", 13)
 	.attr("placeholder", d.description)
 	.attr("wrap", "hard")
 	.style("font-size", "32px");
