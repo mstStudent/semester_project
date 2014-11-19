@@ -46,11 +46,12 @@ var maxId = 5;
 
 
 function addButtons(){
-	var buttonWidth = (WIDTH_Canvas / 3) - (2 * PAD_Buttons);
+	var numButtons = 4;
+	var buttonWidth = (WIDTH_Canvas / numButtons) - ((numButtons - 1) * PAD_Buttons);
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Add)
-	.style("position", "relative")
+	.style("position", "absolute")
 	.style("left", "0px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
@@ -60,8 +61,8 @@ function addButtons(){
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Edit)
-	.style("position", "relative")
-	.style("left", 3*PAD_Buttons+"px")
+	.style("position", "absolute")
+	.style("left", (buttonWidth+PAD_Buttons)+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
@@ -70,13 +71,23 @@ function addButtons(){
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Delete)
-	.style("position", "relative")
-	.style("left", 6*PAD_Buttons+"px")
+	.style("position", "absolute")
+	.style("left", (2*buttonWidth+2*PAD_Buttons)+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
 	.on("click", onClick_Delete);
+
+	d3.select("body").append("button")
+	.attr("id", ID_BTN_Delete)
+	.style("position", "absolute")
+	.style("left", (3*buttonWidth+3*PAD_Buttons)+"px")
+	.style("top", "0px")
+	.style("width", buttonWidth + "px")
+	.style("height", HEIGHT_Buttons + "px")
+	.text("save")
+	.on("click", onClick_Save);
 }
 
 function onClick_Add(){
@@ -89,6 +100,10 @@ function onClick_Edit(){
 
 function onClick_Delete(){
 	myDelete(selectedData);
+}
+
+function onClick_Save(){
+	JSON.stringify(taskTree);
 }
 
 function updateSelectedData(d){
@@ -297,7 +312,7 @@ function myDelete(d){
 		});
 	}
 	// TODO: Could cause a memory leak if we don't free ourselves or get caught in garbage collection?
-	// IMPORTANT: d.parent never null since we can't delete the hidden root
+	// TODO: d.parent never null since we can't delete the hidden root
 	var myIndex = siblings.indexOf(d);
 	siblings.splice(myIndex, 1);
 	selectedData = null;
@@ -307,19 +322,20 @@ function myDelete(d){
 
 function createCanvas(){
 	var localCanvas = d3.select("body").append("svg")
-		.attr("width", WIDTH_Canvas)
-		.attr("height", HEIGHT_Canvas)
-		.attr("id", ID_Canvas)
-		.attr("display", "block");
+	.style("position", "absolute")
+	.style("left", 0+"px")
+	.style("top", HEIGHT_Buttons+"px")
+	.attr("width", WIDTH_Canvas)
+	.attr("height", HEIGHT_Canvas)
+	.attr("id", ID_Canvas)
+	.attr("display", "block");
 
 	return localCanvas;
 }
 
 $(document).ready(function(){
-	// generate the buttons
 	addButtons();
 
-	// startup run
 	d3.json(FILE_JSON, function(error, root){
 	  canvas = createCanvas();
 	  taskTree = root;
