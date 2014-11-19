@@ -45,9 +45,13 @@ var selectedData = null;
 var addColor;
 var maxId = 5;
 
+var colorWheel;
+
 function addWheel(){
  var acw = Raphael.colorwheel($("#colorWheel")[0],100);
  var temp = acw.color;
+
+ colorWheel = acw;
 
  var setColor = function(){
      addColor = temp();
@@ -56,6 +60,44 @@ function addWheel(){
 
  acw.ondrag(setColor,setColor);
  acw.input($("#wheelText")[0]);
+}
+
+var addTabs = function(numTabs){
+    for (var i = 0; i <= numTabs; i++) {
+        $("#jsonArea").append('\t');
+    }
+}
+
+function updateTextBox(data, tabs) {
+    addTabs(tabs);
+    $("#jsonArea").append('\"id\":'+data.id+',\n');
+    addTabs(tabs);
+    $("#jsonArea").append('\"name\": '+data.name+',\n');
+    addTabs(tabs);
+    $("#jsonArea").append('\"children\":[');
+    if (data.children) {
+        $("#jsonArea").append('\n');
+        data.children.forEach(function (child, index) {
+            addTabs(tabs);
+            $("#jsonArea").append('{\n');
+            updateTextBox(child, tabs + 1);
+            addTabs(tabs);
+            $("#jsonArea").append('}');
+            if (index < child.parent.children.length - 1) {
+                    $("#jsonArea").append(',');
+            }
+            $("#jsonArea").append('\n');
+        });
+        addTabs(tabs);
+    }
+    $("#jsonArea").append(']\n');
+}
+
+function addAllData() {
+    $("#jsonArea").text('');
+    $("#jsonArea").append('{\n');
+    updateTextBox(taskTree,1);
+    $("#jsonArea").append('\n}');
 }
 
 function addButtons(){
@@ -89,7 +131,17 @@ function addButtons(){
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
-	.on("click", function(){myDelete(selectedData);});
+	.on("click", function () { myDelete(selectedData); });
+
+	d3.select("body").append("button")
+	.attr("id", "giveMeJson")
+	.style("position", "relative")
+	.style("left", 6 * PAD_Buttons + "px")
+	.style("top", "0px")
+	.style("width", buttonWidth + "px")
+	.style("height", HEIGHT_Buttons + "px")
+	.text("Print Json")
+	.on("click", function () { addAllData(); });
 }
 
 function updateSelectedData(d){
@@ -291,6 +343,7 @@ function showForm(d){
         .attr("y", 100)
         .attr("position","absolute");
         addWheel();
+        colorWheel.color(color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")));
 }
 
 function myAdd(d){
@@ -332,7 +385,6 @@ function createCanvas(){
 		.attr("height", HEIGHT_Canvas)
 		.attr("id", ID_Canvas)
 		.attr("display", "block");
-
 	return localCanvas;
 }
 
