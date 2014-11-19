@@ -285,7 +285,13 @@ function updateFromForm(d){
 
         newName ? d.name = newName : console.log("Name didn't change.");
         newDetails ? d.description = newDetails: console.log("Details didn't change.");
-        addColor ? d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString()) : console.log("Color didn't change.");
+	if(addColor){
+		d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString());
+		selectedData.color = addColor.toString();
+	}else{
+		console.log("Color didn't change.");
+	}
+//        addColor ? d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString()) : console.log("Color didn't change.");
         if(newName && newDetails && addColor){
 		console.log("Something Changed");
 	}else{
@@ -343,7 +349,11 @@ function showForm(d){
         .attr("y", 100)
         .attr("position","absolute");
         addWheel();
-        colorWheel.color(color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")));
+        if(selectedData.color){
+           colorWheel.color(selectedData.color);
+        }else{
+           colorWheel.color(color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")));
+        }
 }
 
 function myAdd(d){
