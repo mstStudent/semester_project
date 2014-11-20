@@ -85,6 +85,10 @@ function updateTextBox(data, tabs) {
     $("#jsonArea").append('\"id\":'+data.id+',\n');
     addTabs(tabs);
     $("#jsonArea").append('\"name\": '+data.name+',\n');
+    if(data.description){
+      addTabs(tabs);
+      $("#jsonArea").append('\"description\": '+data.description+',\n');
+    }
     if(data.percent){
       addTabs(tabs);
       $("#jsonArea").append('\"percent\": '+data.percent+',\n');
@@ -153,6 +157,7 @@ function addButtons(){
 	.text("delete")
 	.on("click", function () { myDelete(selectedData); });
 
+/* Uncomment if you need to debug json printing.
 	d3.select("body").append("button")
 	.attr("id", "giveMeJson")
 	.style("position", "absolute")
@@ -162,6 +167,7 @@ function addButtons(){
 	.style("height", HEIGHT_Buttons + "px")
 	.text("Print Json")
 	.on("click", function () { addAllData(); });
+*/
 }
 
 function updateSelectedData(d){
@@ -326,6 +332,7 @@ function drawTree(c, t){
 
     // exit
     s.exit().remove();
+    addAllData();
 }
 
 function newTask(){
@@ -345,7 +352,7 @@ function updateFromForm(d){
     d.color = colorWheel.color();
     drawTree(canvas, partition(taskTree));
     zoomTo(d, DUR_Update, false);
-    d3.selectAll(".taskName").attr("display","");
+    d3.selectAll("text").attr("display","");
 }
 
 function showForm(d){
@@ -432,7 +439,7 @@ function myEdit(d){
 	if(!formVisible){
 		zoomTo(d, 750, true);
 		setTimeout(function(){
-		        d3.selectAll(".taskName").attr("display","none");
+		        d3.selectAll("text").attr("display","none");
 			showForm(d);
 			}, 760);
 	}
