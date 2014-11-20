@@ -230,13 +230,13 @@ function drawTree(c, t){
     s.select("rect").attr("fill", function(d) { return d.color ? d.color : "blue" });
 
     s.select("." + CLASS_TXT_Name).transition().duration(DUR_Update)
-    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("x", function(d) { return x(d.x) + d.dx*PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + PAD_Text_Y; })
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.name; });
 
     s.select("." + CLASS_TXT_Description).transition().duration(DUR_Update)
-    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("x", function(d) { return x(d.x) + d.dx*PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; });
@@ -258,7 +258,7 @@ function drawTree(c, t){
 
     g.append("text")
     .attr("class", CLASS_TXT_Name)
-    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("x", function(d) { return x(d.x) + d.dx*PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + PAD_Text_Y; })
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.name; })
@@ -266,7 +266,7 @@ function drawTree(c, t){
 
     g.append("text")
     .attr("class", CLASS_TXT_Description)
-    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("x", function(d) { return x(d.x) + d.dx*PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; })
