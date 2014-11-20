@@ -84,10 +84,10 @@ function updateTextBox(data, tabs) {
     addTabs(tabs);
     $("#jsonArea").append('\"id\":'+data.id+',\n');
     addTabs(tabs);
-    $("#jsonArea").append('\"name\": '+data.name+',\n');
+    $("#jsonArea").append('\"name\":\"'+data.name+'\",\n');
     if(data.description){
       addTabs(tabs);
-      $("#jsonArea").append('\"description\": '+data.description+',\n');
+      $("#jsonArea").append('\"description\":\"'+data.description+'\",\n');
     }
     if(data.percent){
       addTabs(tabs);
@@ -95,11 +95,11 @@ function updateTextBox(data, tabs) {
     }
     if(data.color){
 	addTabs(tabs);
-	$("#jsonArea").append('\"color\": '+data.color+',\n');
+	$("#jsonArea").append('\"color\": \"'+data.color+'\",\n');
     }
     addTabs(tabs);
     $("#jsonArea").append('\"children\":[');
-    if (data.children) {
+    if (data.children && data.children.length > 0) {
         $("#jsonArea").append('\n');
         data.children.forEach(function (child, index) {
             addTabs(tabs);
@@ -494,8 +494,28 @@ $(document).ready(function(){
 	  drawTree(canvas, partition(taskTree));
 	  updateSelectedData(taskTree);
 	});
+	$("#jsonOverRide").click(function(){
+		var newJson;
+                var isJSON = true;
+                try{
+			newJson = jQuery.parseJSON($("#jsonArea").val());
+		}
+		catch(err){
+			alert("Error: That is not a JSON object!")
+                        console.log("Parsing TEXT: ",newJson);
+                        console.log("Parsing Error: ",err);
+			isJSON = false;
+		}
+		if(isJSON){
+			try{
+				drawTree(canvas,partition(newJson));
+				taskTree = jQuery.parseJSON($("#jsonArea").val());
+			}
+			catch(err){
+				alert("Error: That is an invalid JSON Object!");
+	                        console.log("ATTEMPTED TO PARTITION: ",newJson);
+                                console.log("PARTITION ERROR: ",err);
+			}
+		}
+	});
 });
-
-
-
-
