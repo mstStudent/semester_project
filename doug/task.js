@@ -4,7 +4,7 @@
 // Purpose: a much cleaner implementation of our task manager using d3 fully
 
 // files
-const FILE_JSON = "index.json";
+const FILE_JSON = "demo.json";
 
 // classes
 const CLASS_Task = "taskRect";
@@ -21,6 +21,7 @@ const ID_BTN_Edit = "BTN_edit";
 const ID_BTN_Delete = "BTN_delete";
 
 // padding
+const NUM_Buttons = 4;
 const PAD_Menu_X = 25;
 const PAD_Menu_Y = 25;
 const PAD_Text_X = 50;
@@ -37,99 +38,134 @@ const HEIGHT_Canvas = 700;
 const HEIGHT_Buttons = 50;
 
 // Test
-const TEXT_SIZE_Labels = 32;
+const TEXT_SIZE_Labels = 48;
 
 var taskTree = null;
 var canvas = null;
 var selectedData = null;
+var addColor;
 var maxId = 5;
+var zoomedTo = null;
+var formVisible = false;
 
+var colorWheel = null;
+
+function addWheel(){
+	colorWheel = Raphael.colorwheel($("#colorWheel")[0], 100);
+	colorWheel.input($("#wheelText")[0]);
+}
+
+var addTabs = function(numTabs){
+    for (var i = 0; i <= numTabs; i++) {
+        $("#jsonArea").append('\t');
+    }
+}
+
+function updateTextBox(data, tabs) {
+	// this prints nicely formatted JSON! :)
+    addTabs(tabs);
+    $("#jsonArea").append('\"id\":'+data.id+',\n');
+    addTabs(tabs);
+    $("#jsonArea").append('\"name\": '+data.name+',\n');
+    addTabs(tabs);
+    $("#jsonArea").append('\"children\":[');
+    if (data.children) {
+        $("#jsonArea").append('\n');
+        data.children.forEach(function (child, index) {
+            addTabs(tabs);
+            $("#jsonArea").append('{\n');
+            updateTextBox(child, tabs + 1);
+            addTabs(tabs);
+            $("#jsonArea").append('}');
+            if (index < child.parent.children.length - 1) {
+                    $("#jsonArea").append(',');
+            }
+            $("#jsonArea").append('\n');
+        });
+        addTabs(tabs);
+    }
+    $("#jsonArea").append(']\n');
+}
+
+function addAllData() {
+    $("#jsonArea").text('');
+    $("#jsonArea").append('{\n');
+    updateTextBox(taskTree,1);
+    $("#jsonArea").append('\n}');
+}
 
 function addButtons(){
-	var numButtons = 4;
-	var buttonWidth = (WIDTH_Canvas / numButtons) - ((numButtons - 1) * PAD_Buttons);
+	var buttonWidth = ((WIDTH_Canvas-((NUM_Buttons - 1) * PAD_Buttons)) / NUM_Buttons);
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Add)
 	.style("position", "absolute")
-	.style("left", "0px")
+	.style("left", PAD_Buttons+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("add")
-	.on("click", onClick_Add);
+	.on("click", function(){myAdd(selectedData);});
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Edit)
 	.style("position", "absolute")
-	.style("left", (buttonWidth+PAD_Buttons)+"px")
+	.style("left", buttonWidth + 2*PAD_Buttons + "px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("edit")
-	.on("click", onClick_Edit);
+	.on("click", function(){myEdit(selectedData);});
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Delete)
 	.style("position", "absolute")
-	.style("left", (2*buttonWidth+2*PAD_Buttons)+"px")
+	.style("left", 2*buttonWidth + 3*PAD_Buttons+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
-	.on("click", onClick_Delete);
+	.on("click", function () { myDelete(selectedData); });
 
 	d3.select("body").append("button")
-	.attr("id", ID_BTN_Delete)
+	.attr("id", "giveMeJson")
 	.style("position", "absolute")
-	.style("left", (3*buttonWidth+3*PAD_Buttons)+"px")
+	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
-	.text("save")
-	.on("click", onClick_Save);
-}
-
-function onClick_Add(){
-	myAdd(selectedData);
-}
-
-function onClick_Edit(){
-	myEdit(selectedData);
-}
-
-function onClick_Delete(){
-	myDelete(selectedData);
-}
-
-function onClick_Save(){
-	JSON.stringify(taskTree);
+	.text("Print Json")
+	.on("click", function () { addAllData(); });
 }
 
 function updateSelectedData(d){
 	// lets us animate the selected node
 	if(selectedData){
 		d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")
-		.attr("fill", "blue");
+		.attr("opacity", "1");
 	}
 	selectedData = d;
 	d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")
-	.attr("fill", "green");
+	.attr("opacity", "0.7");
 }
 
-function onClick_TaskRect(d){
-	updateSelectedData(d);
-}
+function zoomTo(d, duration, heightMod){
+	// added hacky heightMod variable to allow us to zoom to different heights
+	// TODO: Fix this so it isn't awful
+	var heightDomain = 1;
+	if(heightMod){
+		heightDomain = d.y + d.dy;
+	}
 
-function zoomTo(d, duration){
 	// remove the menu if we're giving up on editing for some reason
 	var menu = d3.select("#" + ID_Menu);
 	if(menu){
 		menu.remove();
+		formVisible = false;
 	}
 
 	x.domain([d.x, d.x + d.dx]);
-	y.domain([d.y, 1]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
+	y.domain([d.y, heightDomain]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
 
 	rects = d3.select("#"+ID_Canvas).selectAll("rect");
 	rects.transition()
@@ -156,16 +192,19 @@ function zoomTo(d, duration){
 	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
 	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+
+	zoomedTo = d;
 }
 
 function onDblclick_TaskRect(d){
-	zoomTo(d, 250);
+	zoomTo(d, 250, false);
+	updateSelectedData(d);
 }
 
 // for partitioning
 var x = d3.scale.linear().range([0, WIDTH_Canvas]);
 var y = d3.scale.linear().range([0, HEIGHT_Canvas]);
-var color = d3.scale.category20c();
+// var color = d3.scale.category20c();
 var partition = d3.layout.partition()
 	.children(function(d) { return d.children; })
 	.value(function(d) { return 1; })
@@ -173,7 +212,6 @@ var partition = d3.layout.partition()
 
 function drawTree(c, t){
 	var s = d3.select("#"+ID_Canvas).selectAll("g").data(t, function(d){return d.id;});
-
 	// x and y -> group transform
 	// width and height -> manual
 
@@ -186,8 +224,10 @@ function drawTree(c, t){
     .attr("x", function(d){ return x(d.x); })
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
-    .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", "blue");
+    .attr("height", function(d) { return y(d.dy); });
+
+    // TODO: Figure out why this won't transition anymore?
+    s.select("rect").attr("fill", function(d) { return d.color ? d.color : "blue" });
 
     s.select("." + CLASS_TXT_Name).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
@@ -207,14 +247,14 @@ function drawTree(c, t){
 	.attr("id", function(d){ return (ID_PRFX_Task + d.id); })
     
     g.append("rect")
-    .on("click", onClick_TaskRect)
+    .on("click", function(d){updateSelectedData(d);})
     .on("dblclick", onDblclick_TaskRect)
     .attr("class", CLASS_Task)
     .attr("x", function(d){ return x(d.x); })
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", "blue");
+    .attr("fill", function(d) { return (d.color ? d.color : "blue"); });
 
     g.append("text")
     .attr("class", CLASS_TXT_Name)
@@ -247,12 +287,12 @@ function newTask(){
 }
 
 function updateFromForm(d){
-	d.name = document.getElementById("titleInput").value;
-	d.description = document.getElementById("desTextArea").value;
+    d.name = document.getElementById("titleInput").value;
+    d.description = document.getElementById("desTextArea").value;
+	d.color = colorWheel.color();
 
 	drawTree(canvas, partition(taskTree));
-	d3.select("#inputForm").remove();
-	zoomTo(d, DUR_Update);
+	zoomTo(d, DUR_Update, false);
 }
 
 function showForm(d){
@@ -261,23 +301,23 @@ function showForm(d){
 	.attr("id", ID_Menu)
 	.attr("x", x(d.x) + PAD_Menu_X)
 	.attr("y", y(d.y) + PAD_Menu_Y)
-	.attr("width", 250)
-	.attr("height", y(d.y + d.dy) - y(d.y) - 2*PAD_Menu_Y)
+	.attr("width", 475)
+	.attr("height", 325)
 	.append("xhtml:body")
 	.append("form");
 
 	form.append("input")
 	.attr("id", "titleInput")
 	.attr("type", "text")
-	.attr("size", 13)
-	.attr("placeholder", d.name)
+	.attr("size", 14)
+	.attr("value", d.name)
 	.style("font-size", "32px");
 
 	form.append("textarea")
 	.attr("id", "desTextArea")
 	.attr("rows", 3)
-	.attr("cols", 12)
-	.attr("placeholder", d.description)
+	.attr("cols", 13)
+	.attr("value", d.description)
 	.attr("wrap", "hard")
 	.style("font-size", "32px");
 
@@ -285,6 +325,27 @@ function showForm(d){
 	.attr("type", "button")
 	.attr("value", "OK")
 	.on("click", updateFromForm, d);
+
+    form.append("div")
+    .attr("id", "colorWheel")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("position","absolute");
+
+    form.append("input")
+    .attr("size","7")
+    .attr("type","text")
+    .attr("id","wheelText")
+    .attr("x", 425)
+    .attr("y", 100)
+    .attr("position","absolute");
+
+    addWheel();
+    if(selectedData.color){
+       colorWheel.color(selectedData.color);
+    }else{
+       colorWheel.color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill"));
+    }
 }
 
 function myAdd(d){
@@ -298,11 +359,20 @@ function myAdd(d){
 }
 
 function myEdit(d){
-	zoomTo(d, 750);
-	setTimeout(function(){showForm(d);}, 760);
+	if(!formVisible){
+		zoomTo(d, 750, true);
+		setTimeout(function(){showForm(d);}, 760);
+	}
+	formVisible = true;
 }
 
 function myDelete(d){
+	var menu = d3.select("#" + ID_Menu);
+	if(menu){
+		menu.remove();
+		formVisible = false;
+	}
+
 	// repair parent pointers
 	var siblings = d.parent.children;
 	if(d.children){
@@ -312,7 +382,7 @@ function myDelete(d){
 		});
 	}
 	// TODO: Could cause a memory leak if we don't free ourselves or get caught in garbage collection?
-	// TODO: d.parent never null since we can't delete the hidden root
+	// IMPORTANT: d.parent never null since we can't delete the hidden root
 	var myIndex = siblings.indexOf(d);
 	siblings.splice(myIndex, 1);
 	selectedData = null;
@@ -323,19 +393,20 @@ function myDelete(d){
 function createCanvas(){
 	var localCanvas = d3.select("body").append("svg")
 	.style("position", "absolute")
-	.style("left", 0+"px")
-	.style("top", HEIGHT_Buttons+"px")
+	.style("left", PAD_Buttons + "px")
+	.style("top", HEIGHT_Buttons+PAD_Buttons+"px")
 	.attr("width", WIDTH_Canvas)
 	.attr("height", HEIGHT_Canvas)
 	.attr("id", ID_Canvas)
 	.attr("display", "block");
-
 	return localCanvas;
 }
 
 $(document).ready(function(){
+	// generate the buttons
 	addButtons();
 
+	// startup run
 	d3.json(FILE_JSON, function(error, root){
 	  canvas = createCanvas();
 	  taskTree = root;
