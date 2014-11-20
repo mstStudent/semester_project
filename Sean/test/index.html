@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <script src="js/d3.min.js"></script>
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/raphael-min.js"></script>
+    <script src="js/colorwheel.min.js"></script>
+    <script src="task.js"></script>
+    <link rel="stylesheet" type="text/css" href="task.css">
+  </head>
+  <body>
+      <a href="http://localhost:5000/"><h1>Home</h1></a>
+      <div id="taskArea"></div>
+      <div id="jsonSection">
+        <form action="send" id="theForm" method="POST">
+          Username: <input type="text" id="user" name="user" value="{user}"></input><br />
+          <textarea autofocus name="jsonArea" id="jsonArea" type="text" rows=24 ></textarea><!-- required size="50" -->
+          <input id="theCreateButton" name="submitButton" type="submit" value="Save"></input>
+        </form>
+      </div>

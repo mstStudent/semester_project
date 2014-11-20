@@ -1,0 +1,31 @@
+/*
+  The Color wheel acts really oddly if you dont use relative
+    position and use the provided numbers ( the system will think 
+    that the color wheel is lower and more to the right than what the
+    user can see.
+*/
+body{
+  padding:0px;
+  margin:0px;
+}
+#colorWheel{
+  left: 280px; 
+  position: relative; 
+  top: -140px;
+}
+
+#wheelText{
+  left: 395px;
+  position: relative;
+  top: -230px;
+
+}
+
+#jsonSection{
+  
+}
+#jsonArea{
+  bottom: 0px;
+  float: right;
+  width: 100%;
+}

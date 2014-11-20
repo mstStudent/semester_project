@@ -1,0 +1,27 @@
+{
+	"id":0,
+	"name":"rootTask",
+	"children":[
+		{
+			"id":1,
+			"name":"childTask",
+			"children":[]
+		},
+		{
+			"id":2,
+			"name":"childTask2",
+			"children":[
+				{
+					"id":3,
+					"name":"childsChild",
+					"children":[]
+				},
+				{
+					"id":4,
+					"name":"childsChild2",
+					"children":[]
+				}
+			]
+		}
+	]
+}
