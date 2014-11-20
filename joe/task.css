@@ -4,6 +4,10 @@
     that the color wheel is lower and more to the right than what the
     user can see.
 */
+rect{
+  stroke:#fff;
+}
+
 #colorWheel{
   left: 280px; 
   position: relative; 
@@ -18,8 +22,30 @@
 }
 
 #jsonArea{
-    bottom: 0px;
     position: absolute;
-    width: 100%;
-    height: 150px;
+    top: 800px;
+    width: 1240px;
+    height: 300px;
+}
+
+#slider{
+    background-color: white;
+    top: -45px;
+}
+
+#percentage{
+    top: -35px;
+    position: relative;
+}
+
+.range-bar{
+  background-color: white;
+}
+
+.range-quantity{
+    background-color: black;
+}
+
+.range-min, .range-max{
+    display: none;
 }
