@@ -10,6 +10,7 @@ const FILE_JSON = "demo.json";
 const CLASS_Task = "taskRect";
 const CLASS_TXT_Name = "taskName";
 const CLASS_TXT_Description = "taskDescription";
+const CLASS_PERCENT_DONE = "percentDescription"
 
 // ids
 const ID_PRFX_Task = "tsk";
@@ -21,6 +22,7 @@ const ID_BTN_Edit = "BTN_edit";
 const ID_BTN_Delete = "BTN_delete";
 
 // padding
+const NUM_Buttons = 4;
 const PAD_Menu_X = 25;
 const PAD_Menu_Y = 25;
 const PAD_Text_X = 50;
@@ -37,29 +39,38 @@ const HEIGHT_Canvas = 700;
 const HEIGHT_Buttons = 50;
 
 // Test
-const TEXT_SIZE_Labels = 32;
+const TEXT_SIZE_Labels = 48;
+
+// Default Rect Color
+const DEF_COLOR = "blue"
 
 var taskTree = null;
 var canvas = null;
 var selectedData = null;
 var addColor;
+var percentDone;
+var percentDoneSlider;
 var maxId = 5;
+var zoomedTo = null;
+var formVisible = false;
 
-var colorWheel;
+var colorWheel = null;
+
+function addSlider(startingPercent){
+        var elem = document.querySelector("#slider");
+        percentDoneSlider = new Powerange(elem,{ 
+		min: 0, 
+		max: 100, 
+		start: startingPercent,
+		callback: function(){
+			$("#slider").val() != '100'? $("#percentage").html($("#slider").val()+'% Completed'):$("#percentage").html('Task Completed')
+			}
+		});
+}
 
 function addWheel(){
- var acw = Raphael.colorwheel($("#colorWheel")[0],100);
- var temp = acw.color;
-
- colorWheel = acw;
-
- var setColor = function(){
-     addColor = temp();
-     console.log("addColor: ",addColor);
- }
-
- acw.ondrag(setColor,setColor);
- acw.input($("#wheelText")[0]);
+	colorWheel = Raphael.colorwheel($("#colorWheel")[0], 100);
+	colorWheel.input($("#wheelText")[0]);
 }
 
 var addTabs = function(numTabs){
@@ -69,10 +80,23 @@ var addTabs = function(numTabs){
 }
 
 function updateTextBox(data, tabs) {
+	// this prints nicely formatted JSON! :)
     addTabs(tabs);
     $("#jsonArea").append('\"id\":'+data.id+',\n');
     addTabs(tabs);
     $("#jsonArea").append('\"name\": '+data.name+',\n');
+    if(data.description){
+      addTabs(tabs);
+      $("#jsonArea").append('\"description\": '+data.description+',\n');
+    }
+    if(data.percent){
+      addTabs(tabs);
+      $("#jsonArea").append('\"percent\": '+data.percent+',\n');
+    }
+    if(data.color){
+	addTabs(tabs);
+	$("#jsonArea").append('\"color\": '+data.color+',\n');
+    }
     addTabs(tabs);
     $("#jsonArea").append('\"children\":[');
     if (data.children) {
@@ -101,12 +125,12 @@ function addAllData() {
 }
 
 function addButtons(){
-	var buttonWidth = (WIDTH_Canvas / 3) - (2 * PAD_Buttons);
+	var buttonWidth = ((WIDTH_Canvas-((NUM_Buttons - 1) * PAD_Buttons)) / NUM_Buttons);
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Add)
-	.style("position", "relative")
-	.style("left", "0px")
+	.style("position", "absolute")
+	.style("left", PAD_Buttons+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
@@ -115,8 +139,8 @@ function addButtons(){
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Edit)
-	.style("position", "relative")
-	.style("left", 3*PAD_Buttons+"px")
+	.style("position", "absolute")
+	.style("left", buttonWidth + 2*PAD_Buttons + "px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
@@ -125,23 +149,25 @@ function addButtons(){
 
 	d3.select("body").append("button")
 	.attr("id", ID_BTN_Delete)
-	.style("position", "relative")
-	.style("left", 6*PAD_Buttons+"px")
+	.style("position", "absolute")
+	.style("left", 2*buttonWidth + 3*PAD_Buttons+"px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
 	.on("click", function () { myDelete(selectedData); });
 
+/* Uncomment if you need to debug json printing.
 	d3.select("body").append("button")
 	.attr("id", "giveMeJson")
-	.style("position", "relative")
-	.style("left", 6 * PAD_Buttons + "px")
+	.style("position", "absolute")
+	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
 	.style("top", "0px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("Print Json")
 	.on("click", function () { addAllData(); });
+*/
 }
 
 function updateSelectedData(d){
@@ -155,15 +181,23 @@ function updateSelectedData(d){
 	.attr("opacity", "0.7");
 }
 
-function zoomTo(d, duration){
+function zoomTo(d, duration, heightMod){
+	// added hacky heightMod variable to allow us to zoom to different heights
+	// TODO: Fix this so it isn't awful
+	var heightDomain = 1;
+	if(heightMod){
+		heightDomain = d.y + d.dy;
+	}
+
 	// remove the menu if we're giving up on editing for some reason
 	var menu = d3.select("#" + ID_Menu);
 	if(menu){
 		menu.remove();
+		formVisible = false;
 	}
 
 	x.domain([d.x, d.x + d.dx]);
-	y.domain([d.y, 1]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
+	y.domain([d.y, heightDomain]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
 
 	rects = d3.select("#"+ID_Canvas).selectAll("rect");
 	rects.transition()
@@ -190,16 +224,27 @@ function zoomTo(d, duration){
 	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
 	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+
+        d3.selectAll("."+CLASS_PERCENT_DONE).transition().duration(duration)
+        .attr("user-select", "none")
+        .attr("x_old", function(d) { return d.x; })
+        .attr("y_old", function(d) { return d.y; })
+        .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+        .attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+
+	zoomedTo = d;
 }
 
 function onDblclick_TaskRect(d){
-	zoomTo(d, 250);
+	zoomTo(d, 250, false);
+	updateSelectedData(d);
 }
 
 // for partitioning
 var x = d3.scale.linear().range([0, WIDTH_Canvas]);
 var y = d3.scale.linear().range([0, HEIGHT_Canvas]);
-var color = d3.scale.category20c();
+// var color = d3.scale.category20c();
 var partition = d3.layout.partition()
 	.children(function(d) { return d.children; })
 	.value(function(d) { return 1; })
@@ -219,8 +264,10 @@ function drawTree(c, t){
     .attr("x", function(d){ return x(d.x); })
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
-    .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return color(d.color ? d.color : "blue"); });
+    .attr("height", function(d) { return y(d.dy); });
+
+    // TODO: Figure out why this won't transition anymore?
+    s.select("rect").attr("fill", function(d) { return d.color ? d.color : DEF_COLOR });
 
     s.select("." + CLASS_TXT_Name).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
@@ -234,6 +281,13 @@ function drawTree(c, t){
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; });
 
+    s.select("." + CLASS_PERCENT_DONE).transition().duration(DUR_Update)
+    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .text(function(d){ 
+     return d.percent ? d.percent+'% Completed' : "0% Completed";
+     });
 
 	// enter
 	g = s.enter().append("g")
@@ -247,7 +301,7 @@ function drawTree(c, t){
     .attr("y", function(d){ return y(d.y); })
     .attr("width", function(d) { return x(d.dx); })
     .attr("height", function(d) { return y(d.dy); })
-    .attr("fill", function(d) { return color(d.color ? d.color : "blue"); });
+    .attr("fill", function(d) { return (d.color ? d.color : DEF_COLOR); });
 
     g.append("text")
     .attr("class", CLASS_TXT_Name)
@@ -265,8 +319,20 @@ function drawTree(c, t){
     .text(function(d){ return d.description; })
     .attr("pointer-events", "none");
 
+    g.append("text")
+    .attr("class", CLASS_PERCENT_DONE)
+    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .text(function(d){
+	  return d.percent ? d.percent+'% Completed' : "0% Completed";
+	 })
+    .attr("pointer-events", "none");
+
+
     // exit
     s.exit().remove();
+    addAllData();
 }
 
 function newTask(){
@@ -280,28 +346,13 @@ function newTask(){
 }
 
 function updateFromForm(d){
-        var newName = document.getElementById("titleInput").value;
-        var newDetails = document.getElementById("desTextArea").value;
-
-        newName ? d.name = newName : console.log("Name didn't change.");
-        newDetails ? d.description = newDetails: console.log("Details didn't change.");
-	if(addColor){
-		d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString());
-		selectedData.color = addColor.toString();
-	}else{
-		console.log("Color didn't change.");
-	}
-//        addColor ? d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill",addColor.toString()) : console.log("Color didn't change.");
-        if(newName && newDetails && addColor){
-		console.log("Something Changed");
-	}else{
-		console.log("Nothing Changed");
-		d3.select("#menu").remove();
-		return
-	}
-	drawTree(canvas, partition(taskTree));
-        d3.select("#menu").remove(); 
-	zoomTo(d, DUR_Update);
+    d.name = document.getElementById("titleInput").value;
+    d.description = document.getElementById("desTextArea").value;
+    d.percent = $("#slider").val();
+    d.color = colorWheel.color();
+    drawTree(canvas, partition(taskTree));
+    zoomTo(d, DUR_Update, false);
+    d3.selectAll("text").attr("display","");
 }
 
 function showForm(d){
@@ -319,14 +370,14 @@ function showForm(d){
 	.attr("id", "titleInput")
 	.attr("type", "text")
 	.attr("size", 14)
-	.attr("placeholder", d.name)
+	.attr("value", d.name)
 	.style("font-size", "32px");
 
 	form.append("textarea")
 	.attr("id", "desTextArea")
 	.attr("rows", 3)
 	.attr("cols", 13)
-	.attr("placeholder", d.description)
+	.attr("value", d.description)
 	.attr("wrap", "hard")
 	.style("font-size", "32px");
 
@@ -335,25 +386,43 @@ function showForm(d){
 	.attr("value", "OK")
 	.on("click", updateFromForm, d);
 
-        form.append("div")
-        .attr("id", "colorWheel")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("position","absolute");
+    form.append("div")
+    .attr("id", "colorWheel")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("position","absolute");
 
-        form.append("input")
-        .attr("size","7")
-        .attr("type","text")
-        .attr("id","wheelText")
-        .attr("x", 425)
-        .attr("y", 100)
-        .attr("position","absolute");
-        addWheel();
-        if(selectedData.color){
-           colorWheel.color(selectedData.color);
-        }else{
-           colorWheel.color(color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect")));
-        }
+    form.append("input")
+    .attr("size","7")
+    .attr("type","text")
+    .attr("id","wheelText")
+    .attr("x", 425)
+    .attr("y", 100)
+    .attr("position","absolute");
+
+    form.append("input")
+    .attr("id", "slider")
+    .attr("type","text")
+    .attr("x", 0)
+    .attr("y", 0);
+
+    form.append("div")
+    .attr("id", "percentage")
+    .attr("x", 0)
+    .attr("y", 0);
+
+    if(d.percent){
+       addSlider(d.percent);
+    }else{
+       addSlider(0);
+    }
+
+    addWheel();
+    if(selectedData.color){
+       colorWheel.color(selectedData.color);
+    }else{
+       colorWheel.color(d3.select("#" + ID_PRFX_Task + selectedData.id).select("rect").attr("fill"));
+    }
 }
 
 function myAdd(d){
@@ -367,11 +436,23 @@ function myAdd(d){
 }
 
 function myEdit(d){
-	zoomTo(d, 750);
-	setTimeout(function(){showForm(d);}, 760);
+	if(!formVisible){
+		zoomTo(d, 750, true);
+		setTimeout(function(){
+		        d3.selectAll("text").attr("display","none");
+			showForm(d);
+			}, 760);
+	}
+	formVisible = true;
 }
 
 function myDelete(d){
+	var menu = d3.select("#" + ID_Menu);
+	if(menu){
+		menu.remove();
+		formVisible = false;
+	}
+
 	// repair parent pointers
 	var siblings = d.parent.children;
 	if(d.children){
@@ -391,10 +472,13 @@ function myDelete(d){
 
 function createCanvas(){
 	var localCanvas = d3.select("body").append("svg")
-		.attr("width", WIDTH_Canvas)
-		.attr("height", HEIGHT_Canvas)
-		.attr("id", ID_Canvas)
-		.attr("display", "block");
+	.style("position", "absolute")
+	.style("left", PAD_Buttons + "px")
+	.style("top", HEIGHT_Buttons+PAD_Buttons+"px")
+	.attr("width", WIDTH_Canvas)
+	.attr("height", HEIGHT_Canvas)
+	.attr("id", ID_Canvas)
+	.attr("display", "block");
 	return localCanvas;
 }
 
