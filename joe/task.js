@@ -10,6 +10,7 @@ const FILE_JSON = "demo.json";
 const CLASS_Task = "taskRect";
 const CLASS_TXT_Name = "taskName";
 const CLASS_TXT_Description = "taskDescription";
+const CLASS_PERCENT_DONE = "percentDescription"
 
 // ids
 const ID_PRFX_Task = "tsk";
@@ -218,6 +219,14 @@ function zoomTo(d, duration, heightMod){
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
 	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
+        d3.selectAll("."+CLASS_PERCENT_DONE).transition().duration(duration)
+        .attr("user-select", "none")
+        .attr("x_old", function(d) { return d.x; })
+        .attr("y_old", function(d) { return d.y; })
+        .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+        .attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+
 	zoomedTo = d;
 }
 
@@ -266,6 +275,13 @@ function drawTree(c, t){
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; });
 
+    s.select("." + CLASS_PERCENT_DONE).transition().duration(DUR_Update)
+    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .text(function(d){ 
+     return d.percent ? d.percent+'% Completed' : "0% Completed";
+     });
 
 	// enter
 	g = s.enter().append("g")
@@ -296,6 +312,17 @@ function drawTree(c, t){
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; })
     .attr("pointer-events", "none");
+
+    g.append("text")
+    .attr("class", CLASS_PERCENT_DONE)
+    .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+    .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .text(function(d){
+	  return d.percent ? d.percent+'% Completed' : "0% Completed";
+	 })
+    .attr("pointer-events", "none");
+
 
     // exit
     s.exit().remove();

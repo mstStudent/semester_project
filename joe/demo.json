@@ -1,6 +1,8 @@
 {
 	"id":0,
 	"name":"rootTask",
+        "percent": 50,
+        "color": "red",
 	"children":[
 		{
 			"id":1,
