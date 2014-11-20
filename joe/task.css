@@ -30,7 +30,7 @@ rect{
 
 #slider{
     background-color: white;
-    top: -45px;
+    top: -55px;
 }
 
 #percentage{
@@ -39,6 +39,7 @@ rect{
 }
 
 .range-bar{
+  top: -55px;
   background-color: white;
 }
 
