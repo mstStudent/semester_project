@@ -1,18 +1,20 @@
 // Programmers: Doug Melville , Joseph Pantoga, Sean Dickey 
 // Date: Nov 15, 2014
 // File: index.js
-// Purpose: a much cleaner implementation of our task manager using d3 fully
+// Purpose: Task manager using d3 and javascript w/jquery
 
-// files
-const FILE_JSON = "demo.json";
+// Json file to initally read.
+// TODO: Allow users to upload their own json item either via the text box or a load file function.
+const FILE_JSON = "default.json";
 
-// classes
-const CLASS_Task = "taskRect";
-const CLASS_TXT_Name = "taskName";
-const CLASS_TXT_Description = "taskDescription";
-const CLASS_PERCENT_DONE = "percentDescription"
+// HTML classes that d3 needs to handle a lot. (there are a few classes not here that are used but d3 doesn't deal with them as much)
+// TODO: Review if we really need these four consts since they are really only used twice.
+const CLASS_Task = "taskRect"; // rectangles
+const CLASS_TXT_Name = "taskName"; // The "title"
+const CLASS_TXT_Description = "taskDescription"; // um...name should say it all
+const CLASS_PERCENT_DONE = "percentDescription" // This is for the text portion of the slider 
 
-// ids
+// ids, NOTE: Not all ids are here but these are the main ones d3 deal with
 const ID_PRFX_Task = "tsk";
 const ID_Menu = "menu";
 const ID_Canvas = "canvas";
@@ -21,7 +23,7 @@ const ID_BTN_Add = "BTN_add";
 const ID_BTN_Edit = "BTN_edit";
 const ID_BTN_Delete = "BTN_delete";
 
-// padding
+// padding; d3 can apply these to each rec so we don't need to worry about this in the css file.
 const NUM_Buttons = 4;
 const PAD_Menu_X = 25;
 const PAD_Menu_Y = 25;
@@ -29,7 +31,7 @@ const PAD_Text_X = 50;
 const PAD_Text_Y = 50;
 const PAD_Buttons = 10;
 
-// Duration
+// Duration, used in transitions
 const DUR_Update = 200;
 const DUR_Enter = 200;
 
@@ -38,53 +40,81 @@ const WIDTH_Canvas = 1240;
 const HEIGHT_Canvas = 700;
 const HEIGHT_Buttons = 50;
 
-// Test
+// Text properties
 const TEXT_SIZE_Labels = 48;
 
 // Default Rect Color
 const DEF_COLOR = "blue"
 
-var taskTree = null;
-var canvas = null;
-var selectedData = null;
-var addColor;
-var percentDone;
-var percentDoneSlider;
+/*
+  Global vars that we need throughout the program.
+*/
+var taskTree = null; // THIS IS THE JSON OBJECT DO NOT REMOVE!
+var canvas = null;  // This is the canvas that everything is drawn on
+var selectedData = null; // Rect user selected
+// Max id is only good with the default json file. Id is also the unique property d3 uses to tell the rects appart.
+// TODO: When users upload their json object we need to either dynamically assign ids to each item or count the id's.
 var maxId = 5;
+// Are we zooming in/zoomed in?
 var zoomedTo = null;
+// is the form displayed?
 var formVisible = false;
-
+// This will eventually map to the color wheel in the selected object
 var colorWheel = null;
 
 //Script for the "Save" button
 var saveAddAllData = function () {
+    // If statment is not needed since we have jsonArea update on ever button click, but I'll keep it here just in case.
     if ($("#jsonArea").text() === '') {
         addAllData();
     }
+    console.log("Saved Data");
 }
 
+// Does what the function name implies. startingPercent var also is what it implies
+// NOTE: Slider may or maynot survive the next set of updates we make. (The slider might be replaced or removed)
 function addSlider(startingPercent){
-        var elem = document.querySelector("#slider");
-        percentDoneSlider = new Powerange(elem,{ 
+        var elem = document.querySelector("#slider"); // Not sure why powerange needs the element to be from querySelector but I'm just rolling with it.
+        // Slider object defined, no need to have any variable to track it, since everything is setup in the callback options.
+        new Powerange(elem,{ 
 		min: 0, 
 		max: 100, 
 		start: startingPercent,
 		callback: function(){
+			// Basically if the slider value is not 100 print the % otherwise print 'Task Completed'
 			$("#slider").val() != '100'? $("#percentage").html($("#slider").val()+'% Completed'):$("#percentage").html('Task Completed')
 			}
 		});
 }
 
+// Simply defines the color wheel and tells the color wheel if it has an input object to print to.
 function addWheel(){
-	colorWheel = Raphael.colorwheel($("#colorWheel")[0], 100);
-	colorWheel.input($("#wheelText")[0]);
+	colorWheel = Raphael.colorwheel($("#colorWheel")[0], 100); // Object def
+	colorWheel.input($("#wheelText")[0]); // Tells color wheel to print to this input obj.
 }
 
+// TODO: There should be a better way to do this but this was the first thing that came to me.
+// It just adds the tab character to the jsonArea object.
 var addTabs = function(numTabs){
     for (var i = 0; i <= numTabs; i++) {
         $("#jsonArea").append('\t');
     }
 }
+
+// Recursivly add all of taskTree as a string in the jsonArea
+// TODO: I found a bug, back when we had a button to call this function that if you try to do this enough times then this recursion stops working correctly.
+/*
+	GENERAL FORMAT (*'s mean it's required)
+	{
+		"id": num,*
+		"name": string,*
+		"description": string,
+		"percent": num,
+		"color": string (either color name or hex num),
+		"children: []* (if there are children just repeat the pattern in the children array.)
+	}
+
+*/
 
 function updateTextBox(data, tabs) {
 	// this prints nicely formatted JSON! :)
@@ -123,7 +153,7 @@ function updateTextBox(data, tabs) {
     }
     $("#jsonArea").append(']\n');
 }
-
+// Printing the json starts here!
 function addAllData() {
     $("#jsonArea").text('');
     $("#jsonArea").append('{\n');
@@ -131,20 +161,22 @@ function addAllData() {
     $("#jsonArea").append('\n}');
 }
 
+// Tell d3 to add the 4 buttons; where they should be and other properties that they need.
+// TODO: Rearrange the buttons in the code to reflect the botton arrangement users will see.
 function addButtons(){
 	var buttonWidth = ((WIDTH_Canvas-((NUM_Buttons - 1) * PAD_Buttons)) / NUM_Buttons);
 
     d3.select("body").append("button")
-.attr("id", "goHome")
-.style("position", "absolute")
-.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
-.style("top", "0px")
-.style("width", buttonWidth + "px")
-.style("height", HEIGHT_Buttons + "px")
-.text("Home")
-.on("click", function () { window.location.replace('http://localhost:5000') });
+	.attr("id", "goHome")
+	.style("position", "absolute")
+	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
+	.style("top", "0px")
+	.style("width", buttonWidth + "px")
+	.style("height", HEIGHT_Buttons + "px")
+	.text("Home")
+	.on("click", function () { window.location.replace('http://localhost:5000') });
 
-	d3.select("body").append("button")
+    d3.select("body").append("button")
 	.attr("id", ID_BTN_Add)
 	.style("position", "absolute")
 	.style("left", PAD_Buttons+"px")
@@ -154,7 +186,7 @@ function addButtons(){
 	.text("add")
 	.on("click", function(){myAdd(selectedData);});
 
-	d3.select("body").append("button")
+    d3.select("body").append("button")
 	.attr("id", ID_BTN_Edit)
 	.style("position", "absolute")
 	.style("left", buttonWidth + 2*PAD_Buttons + "px")
@@ -164,7 +196,7 @@ function addButtons(){
 	.text("edit")
 	.on("click", function(){myEdit(selectedData);});
 
-	d3.select("body").append("button")
+    d3.select("body").append("button")
 	.attr("id", ID_BTN_Delete)
 	.style("position", "absolute")
 	.style("left", 2*buttonWidth + 3*PAD_Buttons+"px")
@@ -175,6 +207,7 @@ function addButtons(){
 	.on("click", function () { myDelete(selectedData); });
 
 /* Uncomment if you need to debug json printing.
+	 It just prints the json to jsonArea but every button now does that.
 	d3.select("body").append("button")
 	.attr("id", "giveMeJson")
 	.style("position", "absolute")
@@ -187,6 +220,7 @@ function addButtons(){
 */
 }
 
+// Just updated a global var and makes rect "lighter" to let users know they selected a rect.
 function updateSelectedData(d){
 	// lets us animate the selected node
 	if(selectedData){
@@ -198,6 +232,7 @@ function updateSelectedData(d){
 	.attr("opacity", "0.7");
 }
 
+// Function name should explain it's overall functionality.
 function zoomTo(d, duration, heightMod){
 	// added hacky heightMod variable to allow us to zoom to different heights
 	// TODO: Fix this so it isn't awful
@@ -215,6 +250,10 @@ function zoomTo(d, duration, heightMod){
 
 	x.domain([d.x, d.x + d.dx]);
 	y.domain([d.y, heightDomain]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
+
+/*
+ d3 magic happens here to "zoom" in to the selected rect.
+*/
 
 	rects = d3.select("#"+ID_Canvas).selectAll("rect");
 	rects.transition()
@@ -253,6 +292,7 @@ function zoomTo(d, duration, heightMod){
 	zoomedTo = d;
 }
 
+// What happens when you double click a rect.
 function onDblclick_TaskRect(d){
 	zoomTo(d, 250, false);
 	updateSelectedData(d);
@@ -261,12 +301,16 @@ function onDblclick_TaskRect(d){
 // for partitioning
 var x = d3.scale.linear().range([0, WIDTH_Canvas]);
 var y = d3.scale.linear().range([0, HEIGHT_Canvas]);
+// Why did we remove the color var?
 // var color = d3.scale.category20c();
+
+// More d3 magic DON'T TOUCH!
 var partition = d3.layout.partition()
 	.children(function(d) { return d.children; })
 	.value(function(d) { return 1; })
 	.sort(null);
 
+// Draws the chart from json object. The most called function here other than maybe addAllData()
 function drawTree(c, t){
 	var s = d3.select("#"+ID_Canvas).selectAll("g").data(t, function(d){return d.id;});
 	// x and y -> group transform
@@ -346,12 +390,15 @@ function drawTree(c, t){
 	 })
     .attr("pointer-events", "none");
 
-
     // exit
     s.exit().remove();
+
+    // Print json to jsonArea, It's easier/lazier to check if it's right if everytime it's drawn it's updated.
     addAllData();
 }
 
+// Default task settings.
+// TODO: Allow users to provide this data upon adding vs having to add then edit.
 function newTask(){
 	maxId = maxId + 1;
 	return {
@@ -362,13 +409,21 @@ function newTask(){
 	};
 }
 
+// Again name should give it away.
+// var d is actually the selected rect data.
 function updateFromForm(d){
+// Read from text boxes
     d.name = document.getElementById("titleInput").value;
     d.description = document.getElementById("desTextArea").value;
+// Get slider info
     d.percent = $("#slider").val();
+// Get color wheel data, this is where the global var comes in handy
     d.color = colorWheel.color();
+// Redraw the tree
     drawTree(canvas, partition(taskTree));
+// Due to some "fun bugs" we need to rezoom to the spot. Doug is that right?
     zoomTo(d, DUR_Update, false);
+// After editing unhide all the text.
     d3.selectAll("text").attr("display","");
 }
 
@@ -402,7 +457,7 @@ function showForm(d){
 	.attr("type", "button")
 	.attr("value", "OK")
 	.on("click", updateFromForm, d);
-
+// Add color wheel spot holder div and it's input box
     form.append("div")
     .attr("id", "colorWheel")
     .attr("x", 0)
@@ -417,23 +472,25 @@ function showForm(d){
     .attr("y", 100)
     .attr("position","absolute");
 
+// Add slider's spot holder, it needs an input box. It really just hides this later and puts the slider directly below the spot of the input box (unless css rules say otherwise)
     form.append("input")
     .attr("id", "slider")
     .attr("type","text")
     .attr("x", 0)
     .attr("y", 0);
-
+// Text for progress
     form.append("div")
     .attr("id", "percentage")
     .attr("x", 0)
     .attr("y", 0);
-
+// If d (rect selected by d3 at this moment) has % data print it otherwise it's 0 
     if(d.percent){
        addSlider(d.percent);
     }else{
        addSlider(0);
     }
 
+// Set up wheel, if the selected rect has a color print that otherwise find out what it is.
     addWheel();
     if(selectedData.color){
        colorWheel.color(selectedData.color);
@@ -442,6 +499,7 @@ function showForm(d){
     }
 }
 
+// Add rect to chart and another object to taskTree.
 function myAdd(d){
 	if(!d.children){
 		d.children = [];
@@ -452,6 +510,7 @@ function myAdd(d){
 	drawTree(canvas, partition(taskTree));
 }
 
+// Edit selected rects data
 function myEdit(d){
 	if(!formVisible){
 		zoomTo(d, 750, true);
@@ -463,6 +522,9 @@ function myEdit(d){
 	formVisible = true;
 }
 
+// Delete rect.
+// TODO: We need to do some more tests on this and check it visually.
+// NOTE: d3 can do some "funny" things with the chart when we delete things
 function myDelete(d){
 	var menu = d3.select("#" + ID_Menu);
 	if(menu){
@@ -499,6 +561,7 @@ function createCanvas(){
 	return localCanvas;
 }
 
+// This block basically starts this and checks if any condtional items are meet.
 $(document).ready(function(){
 	// generate the buttons
 	addButtons();
@@ -511,6 +574,8 @@ $(document).ready(function(){
 	  drawTree(canvas, partition(taskTree));
 	  updateSelectedData(taskTree);
 	});
+
+// THIS ISN'T USED RIGHT NOW, Joe had a "Read From TextBox" button but removed it. Might add it back in before the demo.
 	$("#jsonOverRide").click(function(){
 		var newJson;
                 var isJSON = true;
