@@ -1,0 +1,57 @@
+/*
+  The Color wheel acts really oddly if you dont use relative
+    position and use the provided numbers ( the system will think 
+    that the color wheel is lower and more to the right than what the
+    user can see.
+*/
+rect{
+  stroke:#fff;
+}
+
+#colorWheel{
+  left: 280px; 
+  position: relative; 
+  top: -140px;
+}
+
+#wheelText{
+  left: 395px;
+  position: relative;
+  top: -230px;
+
+}
+
+#jsonArea{
+    position: absolute;
+    top: 70px;
+    width: 1240px;
+    height: 300px;
+}
+
+#slider{
+    background-color: white;
+    top: -55px;
+}
+
+#percentage{
+    top: -35px;
+    position: relative;
+}
+
+.range-bar{
+  top: -55px;
+  background-color: white;
+}
+
+.range-quantity{
+    background-color: black;
+}
+
+.range-min, .range-max{
+    display: none;
+}
+
+#theForm{
+	bottom: 135px;
+	position: absolute;
+}

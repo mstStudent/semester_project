@@ -1,0 +1,30 @@
+{
+		"id":0,
+		"name":"rootTask",
+		"percent": 50,
+		"color": "#45ff00",
+		"children":[
+		{
+			"id":1,
+			"name":"childTask",
+			"children":[]
+		},
+		{
+			"id":2,
+			"name":"childTask2",
+			"children":[
+			{
+				"id":3,
+				"name":"childsChild",
+				"children":[]
+			},
+			{
+				"id":4,
+				"name":"childsChild2",
+				"children":[]
+			}
+			]
+		}
+		]
+
+}
