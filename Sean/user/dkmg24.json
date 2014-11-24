@@ -9,7 +9,7 @@
 		},
 		{
 			"id":2,
-			"name": "Stuff",
+			"name": "childTask2",
 			"children":[
 			{
 				"id":3,
@@ -22,16 +22,6 @@
 				"children":[]
 			}
 			]
-		},
-		{
-			"id":6,
-			"name": "title",
-			"children":[]
-		},
-		{
-			"id":7,
-			"name": "title",
-			"children":[]
 		}
 		]
 

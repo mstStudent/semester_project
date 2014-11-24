@@ -23,7 +23,7 @@ rect{
 
 #jsonArea{
     position: absolute;
-    top: 70px;
+    top: 50px;
     width: 1240px;
     height: 300px;
 }
@@ -52,6 +52,6 @@ rect{
 }
 
 #theForm{
-	bottom: 135px;
+	top: 780px;
 	position: absolute;
 }

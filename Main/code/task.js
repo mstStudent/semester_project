@@ -170,7 +170,7 @@ function addButtons(){
 	.attr("id", "goHome")
 	.style("position", "absolute")
 	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
-	.style("top", "0px")
+	.style("top", PAD_Buttons + "px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("Home")
@@ -180,7 +180,7 @@ function addButtons(){
 	.attr("id", ID_BTN_Add)
 	.style("position", "absolute")
 	.style("left", PAD_Buttons+"px")
-	.style("top", "0px")
+	.style("top", PAD_Buttons+"px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("add")
@@ -190,7 +190,7 @@ function addButtons(){
 	.attr("id", ID_BTN_Edit)
 	.style("position", "absolute")
 	.style("left", buttonWidth + 2*PAD_Buttons + "px")
-	.style("top", "0px")
+	.style("top", PAD_Buttons+"px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("edit")
@@ -200,7 +200,7 @@ function addButtons(){
 	.attr("id", ID_BTN_Delete)
 	.style("position", "absolute")
 	.style("left", 2*buttonWidth + 3*PAD_Buttons+"px")
-	.style("top", "0px")
+	.style("top", PAD_Buttons+"px")
 	.style("width", buttonWidth + "px")
 	.style("height", HEIGHT_Buttons + "px")
 	.text("delete")
@@ -251,9 +251,9 @@ function zoomTo(d, duration, heightMod){
 	x.domain([d.x, d.x + d.dx]);
 	y.domain([d.y, heightDomain]).range([d.y ? 50 : 0, HEIGHT_Canvas]);
 
-/*
- d3 magic happens here to "zoom" in to the selected rect.
-*/
+	/*
+	 d3 magic happens here to "zoom" in to the selected rect.
+	*/
 
 	rects = d3.select("#"+ID_Canvas).selectAll("rect");
 	rects.transition()
@@ -281,13 +281,13 @@ function zoomTo(d, duration, heightMod){
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
 	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
-        d3.selectAll("."+CLASS_PERCENT_DONE).transition().duration(duration)
-        .attr("user-select", "none")
-        .attr("x_old", function(d) { return d.x; })
-        .attr("y_old", function(d) { return d.y; })
-        .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
-        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
-        .attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+	d3.selectAll("."+CLASS_PERCENT_DONE).transition().duration(duration)
+	.attr("user-select", "none")
+	.attr("x_old", function(d) { return d.x; })
+	.attr("y_old", function(d) { return d.y; })
+	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
+	.attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
 	zoomedTo = d;
 }
@@ -412,18 +412,18 @@ function newTask(){
 // Again name should give it away.
 // var d is actually the selected rect data.
 function updateFromForm(d){
-// Read from text boxes
+	// Read from text boxes
     d.name = document.getElementById("titleInput").value;
     d.description = document.getElementById("desTextArea").value;
-// Get slider info
+	// Get slider info
     d.percent = $("#slider").val();
-// Get color wheel data, this is where the global var comes in handy
+	// Get color wheel data, this is where the global var comes in handy
     d.color = colorWheel.color();
-// Redraw the tree
+	// Redraw the tree
     drawTree(canvas, partition(taskTree));
-// Due to some "fun bugs" we need to rezoom to the spot. Doug is that right?
+	// Due to some "fun bugs" we need to rezoom to the spot. Doug is that right?
     zoomTo(d, DUR_Update, false);
-// After editing unhide all the text.
+	// After editing unhide all the text.
     d3.selectAll("text").attr("display","");
 }
 
@@ -457,7 +457,7 @@ function showForm(d){
 	.attr("type", "button")
 	.attr("value", "OK")
 	.on("click", updateFromForm, d);
-// Add color wheel spot holder div and it's input box
+	// Add color wheel spot holder div and it's input box
     form.append("div")
     .attr("id", "colorWheel")
     .attr("x", 0)
@@ -472,25 +472,25 @@ function showForm(d){
     .attr("y", 100)
     .attr("position","absolute");
 
-// Add slider's spot holder, it needs an input box. It really just hides this later and puts the slider directly below the spot of the input box (unless css rules say otherwise)
+	// Add slider's spot holder, it needs an input box. It really just hides this later and puts the slider directly below the spot of the input box (unless css rules say otherwise)
     form.append("input")
     .attr("id", "slider")
     .attr("type","text")
     .attr("x", 0)
     .attr("y", 0);
-// Text for progress
+	// Text for progress
     form.append("div")
     .attr("id", "percentage")
     .attr("x", 0)
     .attr("y", 0);
-// If d (rect selected by d3 at this moment) has % data print it otherwise it's 0 
+	// If d (rect selected by d3 at this moment) has % data print it otherwise it's 0 
     if(d.percent){
        addSlider(d.percent);
     }else{
        addSlider(0);
     }
 
-// Set up wheel, if the selected rect has a color print that otherwise find out what it is.
+	// Set up wheel, if the selected rect has a color print that otherwise find out what it is.
     addWheel();
     if(selectedData.color){
        colorWheel.color(selectedData.color);
@@ -553,7 +553,7 @@ function createCanvas(){
 	var localCanvas = d3.select("body").append("svg")
 	.style("position", "absolute")
 	.style("left", PAD_Buttons + "px")
-	.style("top", HEIGHT_Buttons+PAD_Buttons+"px")
+	.style("top", HEIGHT_Buttons+2*PAD_Buttons+"px")
 	.attr("width", WIDTH_Canvas)
 	.attr("height", HEIGHT_Canvas)
 	.attr("id", ID_Canvas)
