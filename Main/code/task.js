@@ -12,10 +12,13 @@ const FILE_JSON = "default.json";
 const CLASS_Task = "taskRect"; // rectangles
 const CLASS_TXT_Name = "taskName"; // The "title"
 const CLASS_TXT_Description = "taskDescription"; // um...name should say it all
-const CLASS_PERCENT_DONE = "percentDescription" // This is for the text portion of the slider 
+const CLASS_PERCENT_DONE = "percentDescription"; // This is for the text portion of the slider 
+const CLASS_ClipPath = "cpath";
 
 // ids, NOTE: Not all ids are here but these are the main ones d3 deal with
 const ID_PRFX_Task = "tsk";
+const ID_PRFX_TaskRect = "tskRect";
+const ID_PRFX_ClipRect = "clpPath";
 const ID_Menu = "menu";
 const ID_Canvas = "canvas";
 const ID_HiddenRoot = "hiddenRoot";
@@ -312,7 +315,8 @@ var partition = d3.layout.partition()
 
 // Draws the chart from json object. The most called function here other than maybe addAllData()
 function drawTree(c, t){
-	var s = d3.select("#"+ID_Canvas).selectAll("g").data(t, function(d){return d.id;});
+	var s = d3.select("#"+ID_Canvas).selectAll("g").data(t, function(d){ return d.id; });
+	var c = d3.select("#"+ID_Canvas).select("defs").selectAll("."+CLASS_ClipPath).data(t, function(d){ return d.id; });
 	// x and y -> group transform
 	// width and height -> manual
 
@@ -344,11 +348,17 @@ function drawTree(c, t){
 
     s.select("." + CLASS_PERCENT_DONE).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
-        .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
+    .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
     .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
     .text(function(d){ 
      return d.percent ? d.percent+'% Completed' : "0% Completed";
      });
+
+    c.select("rect").transition().duration(DUR_Update)
+    .attr("x", function(d){ return x(d.x); })
+    .attr("y", function(d){ return y(d.y); })
+    .attr("width", function(d) { return x(d.dx); })
+    .attr("height", function(d) { return y(d.dy); });
 
 	// enter
 	g = s.enter().append("g")
@@ -390,8 +400,20 @@ function drawTree(c, t){
 	 })
     .attr("pointer-events", "none");
 
+    c.enter().append("clipPath")
+    .attr("id", function(d){ return (ID_PRFX_ClipRect + d.id); })
+    .attr("class", CLASS_ClipPath)
+    .append("rect")
+    .attr("x", function(d){ return x(d.x); })
+    .attr("y", function(d){ return y(d.y); })
+    .attr("width", function(d) { return x(d.dx); })
+    .attr("height", function(d) { return y(d.dy); });
+
+    g.style("clip-path", function(d){ return "url(#"+ID_PRFX_ClipRect+d.id+")"; });
+
     // exit
     s.exit().remove();
+    c.exit().remove();
 
     // Print json to jsonArea, It's easier/lazier to check if it's right if everytime it's drawn it's updated.
     addAllData();
@@ -557,7 +579,8 @@ function createCanvas(){
 	.attr("width", WIDTH_Canvas)
 	.attr("height", HEIGHT_Canvas)
 	.attr("id", ID_Canvas)
-	.attr("display", "block");
+	.attr("display", "block")
+	.append("defs");
 	return localCanvas;
 }
 
