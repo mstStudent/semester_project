@@ -1,7 +1,6 @@
 {
 		"id":0,
 		"name":"This is mine",
-		"percent": 0,
 		"color": "#ff0050",
 		"children":[
 		{
@@ -18,7 +17,9 @@
 		},
 		{
 			"id":2,
-			"name":"childTask2",
+			"name":"Algorithms Project",
+			"percent": 0,
+			"color": "#df00ff",
 			"children":[
 			{
 				"id":3,
