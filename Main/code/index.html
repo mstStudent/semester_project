@@ -16,9 +16,10 @@
       <div id="taskArea"></div>
       <div id="jsonSection">
           <form action="send" id="theForm" method="POST">
-              Username: <input type="text" id="user" name="user" value="{user}"></input><br />
-              <textarea autofocus name="jsonArea" id="jsonArea" type="text" rows=24></textarea><!-- required size="50" -->
+              Username: <input type="text" id="user" name="user" value="{user}"></input>
               <input id="theCreateButton" name="submitButton" type="submit" value="Save" onclick="saveAddAllData()"></input>
+              <button id="theAddDataButton" type="button" onclick="addAllData()">Update JSON</button>
+              <textarea autofocus name="jsonArea" id="jsonArea" type="text" rows=24></textarea><!-- required size="50" -->
           </form>
       </div>
   </body>

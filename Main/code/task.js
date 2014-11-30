@@ -57,7 +57,7 @@ var canvas = null;  // This is the canvas that everything is drawn on
 var selectedData = null; // Rect user selected
 // Max id is only good with the default json file. Id is also the unique property d3 uses to tell the rects appart.
 // TODO: When users upload their json object we need to either dynamically assign ids to each item or count the id's.
-var maxId = 5;
+var maxId = 0;
 // Are we zooming in/zoomed in?
 var zoomedTo = null;
 // is the form displayed?
@@ -274,7 +274,7 @@ function zoomTo(d, duration, heightMod){
 	.attr("y_old", function(d) { return d.y; })
 	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + PAD_Text_Y; })
-	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+	//.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
 	d3.selectAll("."+CLASS_TXT_Description).transition().duration(duration)
 	.attr("user-select", "none")
@@ -282,7 +282,7 @@ function zoomTo(d, duration, heightMod){
 	.attr("y_old", function(d) { return d.y; })
 	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
-	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+	//.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
 	d3.selectAll("."+CLASS_PERCENT_DONE).transition().duration(duration)
 	.attr("user-select", "none")
@@ -290,7 +290,7 @@ function zoomTo(d, duration, heightMod){
 	.attr("y_old", function(d) { return d.y; })
 	.attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
-	.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
+	//.attr("font-size", function(d){return ((x(d.x + d.dx) - x(d.x))/WIDTH_Canvas)*TEXT_SIZE_Labels; });
 
 	zoomedTo = d;
 }
@@ -337,19 +337,19 @@ function drawTree(c, t){
     s.select("." + CLASS_TXT_Name).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){ return d.name; });
 
     s.select("." + CLASS_TXT_Description).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
 	.attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; });
 
     s.select("." + CLASS_PERCENT_DONE).transition().duration(DUR_Update)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){ 
      return d.percent ? d.percent+'% Completed' : "0% Completed";
      });
@@ -378,27 +378,33 @@ function drawTree(c, t){
     .attr("class", CLASS_TXT_Name)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){ return d.name; })
-    .attr("pointer-events", "none");
+    .attr("pointer-events", "none")
+    .style("user-select", "none")
+    .style("webkit-user-select", "none");
 
     g.append("text")
     .attr("class", CLASS_TXT_Description)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + 2*PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){ return d.description; })
-    .attr("pointer-events", "none");
+    .attr("pointer-events", "none")
+    .style("user-select", "none")
+    .style("webkit-user-select", "none");
 
     g.append("text")
     .attr("class", CLASS_PERCENT_DONE)
     .attr("x", function(d) { return x(d.x) + PAD_Text_X; })
     .attr("y", function(d) { return y(d.y) + 4*PAD_Text_Y; })
-    .attr("font-size", function(d){return d.dx*TEXT_SIZE_Labels; })
+    .attr("font-size", function(d){return TEXT_SIZE_Labels; })
     .text(function(d){
 	  return d.percent ? d.percent+'% Completed' : "0% Completed";
 	 })
-    .attr("pointer-events", "none");
+    .attr("pointer-events", "none")
+    .style("user-select", "none")
+    .style("webkit-user-select", "none");
 
     c.enter().append("clipPath")
     .attr("id", function(d){ return (ID_PRFX_ClipRect + d.id); })
@@ -416,7 +422,7 @@ function drawTree(c, t){
     c.exit().remove();
 
     // Print json to jsonArea, It's easier/lazier to check if it's right if everytime it's drawn it's updated.
-    addAllData();
+    // addAllData();
 }
 
 // Default task settings.
@@ -471,7 +477,7 @@ function showForm(d){
 	.attr("id", "desTextArea")
 	.attr("rows", 3)
 	.attr("cols", 13)
-	.attr("value", d.description)
+	.html(d.description)
 	.attr("wrap", "hard")
 	.style("font-size", "32px");
 
@@ -528,7 +534,6 @@ function myAdd(d){
 	}
 	n = newTask();
 	d.children.push(n);
-
 	drawTree(canvas, partition(taskTree));
 }
 
@@ -584,6 +589,18 @@ function createCanvas(){
 	return localCanvas;
 }
 
+function getMaxId(t, currentMax){
+	if(t.children){
+		t.children.forEach(function(e, i){
+			currentMax = getMaxId(e, currentMax);
+		});
+	}
+	if(t.id > currentMax){
+		currentMax = t.id;
+	}
+	return currentMax;
+}
+
 // This block basically starts this and checks if any condtional items are meet.
 $(document).ready(function(){
 	// generate the buttons
@@ -595,6 +612,7 @@ $(document).ready(function(){
 	  taskTree = root;
 	  // TODO: How come we have to partition out here and not in the function?!
 	  drawTree(canvas, partition(taskTree));
+	  maxId = getMaxId(taskTree, 0);
 	  updateSelectedData(taskTree);
 	});
 

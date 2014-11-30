@@ -18,7 +18,6 @@
 		{
 			"id":2,
 			"name":"Algorithms Project",
-			"percent": 0,
 			"color": "#df00ff",
 			"children":[
 			{

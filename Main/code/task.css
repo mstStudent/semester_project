@@ -54,4 +54,11 @@ rect{
 #theForm{
 	top: 780px;
 	position: absolute;
+  width:1240px;
 }
+
+#jsonArea{
+  left:0px;
+  position: absolute;
+}
+
