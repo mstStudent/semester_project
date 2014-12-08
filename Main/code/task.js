@@ -535,6 +535,7 @@ function myAdd(d){
 	n = newTask();
 	d.children.push(n);
 	drawTree(canvas, partition(taskTree));
+	zoomTo(d, DUR_Update, 0);
 }
 
 // Edit selected rects data
