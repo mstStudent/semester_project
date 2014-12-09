@@ -1,5 +1,10 @@
-Last Update: Dec 8 2014
-By: dkmg24
+Project By: dkmg24 & mststudent
+-------------------------------
+Dec 8 2014
+dkmg24 - Added bulk of todo list
+-------------------------------
+Last Update: Dec 9 2014
+By: mststudent
 
 Bugs:
 
