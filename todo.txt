@@ -11,5 +11,7 @@ get rid of the JSON area, replace with download button
 center interface in window
 
 Architecture:
-migrate to Apache
-migrate to mySQL
+migrate to Apache - Apache or Apache2 or Lighttpd?
+migrate to mySQL - which is better for this mySQL or postgresql?
+migrate from pure html w/js to a web-frame w/js (like bootstrap or something) it
+could solve the mobile compatibility and help with making things look "pretty"
