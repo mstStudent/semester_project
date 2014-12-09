@@ -32,7 +32,8 @@ const PAD_Menu_X = 25;
 const PAD_Menu_Y = 25;
 const PAD_Text_X = 50;
 const PAD_Text_Y = 50;
-const PAD_Buttons = 10;
+//now in css file
+//const PAD_Buttons = 10;
 
 // Duration, used in transitions
 const DUR_Update = 200;
@@ -41,7 +42,8 @@ const DUR_Enter = 200;
 // Dimensions
 const WIDTH_Canvas = 1240;
 const HEIGHT_Canvas = 700;
-const HEIGHT_Buttons = 50;
+//Now in the CSS File
+//const HEIGHT_Buttons = 50;
 
 // Text properties
 const TEXT_SIZE_Labels = 48;
@@ -65,6 +67,7 @@ var formVisible = false;
 // This will eventually map to the color wheel in the selected object
 var colorWheel = null;
 
+//  NOW OBSOLETE  \\
 //Script for the "Save" button
 var saveAddAllData = function () {
     // If statment is not needed since we have jsonArea update on ever button click, but I'll keep it here just in case.
@@ -167,51 +170,36 @@ function addAllData() {
 // Tell d3 to add the 4 buttons; where they should be and other properties that they need.
 // TODO: Rearrange the buttons in the code to reflect the botton arrangement users will see.
 function addButtons(){
-	var buttonWidth = ((WIDTH_Canvas-((NUM_Buttons - 1) * PAD_Buttons)) / NUM_Buttons);
+	//Use the CSS file
+  //var buttonWidth = ((WIDTH_Canvas-((NUM_Buttons - 1) * PAD_Buttons)) / NUM_Buttons);
 
-    d3.select("body").append("button")
+    d3.select("#navBar").append("button")
 	.attr("id", "goHome")
-	.style("position", "absolute")
-	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
-	.style("top", PAD_Buttons + "px")
-	.style("width", buttonWidth + "px")
-	.style("height", HEIGHT_Buttons + "px")
+  .attr("class", "navButton")
 	.text("Home")
-	.on("click", function () { window.location.replace('http://localhost:5000') });
+	.on("click", function () { window.location.replace('../../') });
 
-    d3.select("body").append("button")
+    d3.select("#navBar").append("button")
 	.attr("id", ID_BTN_Add)
-	.style("position", "absolute")
-	.style("left", PAD_Buttons+"px")
-	.style("top", PAD_Buttons+"px")
-	.style("width", buttonWidth + "px")
-	.style("height", HEIGHT_Buttons + "px")
+  .attr("class", "navButton")
 	.text("add")
 	.on("click", function(){myAdd(selectedData);});
 
-    d3.select("body").append("button")
+    d3.select("#navBar").append("button")
 	.attr("id", ID_BTN_Edit)
-	.style("position", "absolute")
-	.style("left", buttonWidth + 2*PAD_Buttons + "px")
-	.style("top", PAD_Buttons+"px")
-	.style("width", buttonWidth + "px")
-	.style("height", HEIGHT_Buttons + "px")
+  .attr("class", "navButton")
 	.text("edit")
 	.on("click", function(){myEdit(selectedData);});
 
-    d3.select("body").append("button")
+    d3.select("#navBar").append("button")
 	.attr("id", ID_BTN_Delete)
-	.style("position", "absolute")
-	.style("left", 2*buttonWidth + 3*PAD_Buttons+"px")
-	.style("top", PAD_Buttons+"px")
-	.style("width", buttonWidth + "px")
-	.style("height", HEIGHT_Buttons + "px")
+  .attr("class", "navButton")
 	.text("delete")
 	.on("click", function () { myDelete(selectedData); });
 
 /* Uncomment if you need to debug json printing.
 	 It just prints the json to jsonArea but every button now does that.
-	d3.select("body").append("button")
+	d3.select("#taskArea").append("button")
 	.attr("id", "giveMeJson")
 	.style("position", "absolute")
 	.style("left", 3*buttonWidth + 4*PAD_Buttons + "px")
@@ -463,7 +451,7 @@ function showForm(d){
 	.attr("y", y(d.y) + PAD_Menu_Y)
 	.attr("width", 475)
 	.attr("height", 325)
-	.append("xhtml:body")
+	.append("xhtml:taskArea")
 	.append("form");
 
 	form.append("input")
@@ -578,10 +566,7 @@ function myDelete(d){
 }
 
 function createCanvas(){
-	var localCanvas = d3.select("body").append("svg")
-	.style("position", "absolute")
-	.style("left", PAD_Buttons + "px")
-	.style("top", HEIGHT_Buttons+2*PAD_Buttons+"px")
+	var localCanvas = d3.select("#taskArea").append("svg")
 	.attr("width", WIDTH_Canvas)
 	.attr("height", HEIGHT_Canvas)
 	.attr("id", ID_Canvas)

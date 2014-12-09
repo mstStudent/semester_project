@@ -4,6 +4,9 @@
     that the color wheel is lower and more to the right than what the
     user can see.
 */
+body{
+  margin:0px;
+}
 rect{
   stroke:#fff;
 }
@@ -22,7 +25,6 @@ rect{
 }
 
 #jsonArea{
-    position: absolute;
     top: 50px;
     width: 1240px;
     height: 300px;
@@ -51,14 +53,15 @@ rect{
     display: none;
 }
 
-#theForm{
-	top: 780px;
-	position: absolute;
-  width:1240px;
+.navButton{
+  width:25%;
+  height:50px;
 }
 
-#jsonArea{
-  left:0px;
-  position: absolute;
+#navBar{
+  width:100%;
 }
 
+#taskArea{
+  overflow-x:scroll;
+}
