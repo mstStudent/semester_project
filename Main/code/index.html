@@ -13,13 +13,13 @@
     <script src="task.js"></script>
   </head>
   <body>
-      <div id="taskArea"></div>
-      <div id="jsonSection">
+      <div id="taskArea" ></div>
+      <div id="jsonSection" >
           <form action="send" id="theForm" method="POST">
               Username: <input type="text" id="user" name="user" value="{user}"></input>
               <input id="theCreateButton" name="submitButton" type="submit" value="Save" onclick="saveAddAllData()"></input>
-              <button id="theAddDataButton" type="button" onclick="addAllData()">Update JSON</button>
-              <textarea autofocus name="jsonArea" id="jsonArea" type="text" rows=24></textarea><!-- required size="50" -->
+              <button id="downloadButton" type="button"><a href="default.json" rel="nofollow" target="_blank" style="color: black; text-decoration:none;">Download JSON</a></button>
+              <textarea autofocus name="jsonArea" id="jsonArea" type="text" rows=24 style="display: none;"></textarea><!-- required size="50" -->
           </form>
       </div>
   </body>
