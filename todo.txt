@@ -14,6 +14,7 @@ change navigation from double click to something else for mobile
 find a way to simplify drawTree
 get rid of the JSON area, replace with download button - Might need to use Ajax calls for this to work, so we will need either php or a webframe to do this. I think js can't really do this (easily) due to security problems that can come up.
 center interface in window
+Date picker -- http://plugins.jquery.com/tag/calendar/ (List of possible libs to use)
 
 Architecture:
 migrate to Apache - Apache or Apache2 or Lighttpd?

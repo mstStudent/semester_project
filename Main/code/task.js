@@ -487,8 +487,16 @@ function showForm(d){
     .attr("x", 425)
     .attr("y", 100)
     .attr("position","absolute");
+ 
+    form.append("input")
+    .attr("id", "date")
+    .attr("type","text")
+    .attr("x", 400)
+    .attr("y", 100)
+    .attr("position","absolute");
 
 	// Add slider's spot holder, it needs an input box. It really just hides this later and puts the slider directly below the spot of the input box (unless css rules say otherwise)
+/*
     form.append("input")
     .attr("id", "slider")
     .attr("type","text")
@@ -505,7 +513,10 @@ function showForm(d){
     }else{
        addSlider(0);
     }
-
+*/
+    $('#date').pickmeup({
+		format  : 'm-d-Y'
+	});
 	// Set up wheel, if the selected rect has a color print that otherwise find out what it is.
     addWheel();
     if(selectedData.color){
